@@ -101,7 +101,7 @@ async def flip(ctx, betAmount):
                 betAmount = int(betAmount)
                 VEerror = True
             except ValueError:
-                await ctx.send(f"invalid syntax @{ctx.author.name}")
+                await ctx.send(f"invalid syntax {ctx.author.name}")
                 VEerror = False
             finally:
                 if VEerror:
@@ -121,9 +121,9 @@ async def flip(ctx, betAmount):
                                 meL = l + " lost, total: " + str(punkte) + " credits!"
                                 await ctx.send((meL))
                         else:
-                            await ctx.send(f"invalid syntaxn background @{ctx.author.name}")
+                            await ctx.send(f"invalid syntaxn background {ctx.author.name}")
                     else:
-                        await ctx.send(f"Positive numbers only @{ctx.author.name}")
+                        await ctx.send(f"Positive numbers only {ctx.author.name}")
             
         #saving stats to ({ctx.author.name}) file
         f = open((l), "w")
@@ -147,14 +147,14 @@ async def credits(ctx):
         creditsLines = creditsCommandCheck.readlines()
         for creditsLine in creditsLines:
             creditsCheckInt = int(creditsLine)
-            await ctx.send(f" {ctx.author.name} has {creditsCheckInt} credits.")
+            await ctx.send(f"{ctx.author.name} has {creditsCheckInt} credits.")
     if creditsCheckInt < 100:
-        await ctx.send(f" i felt bad for @{ctx.author.name} and gave him 300 credits.")
+        await ctx.send(f"i felt bad for @{ctx.author.name} and gave him 300 credits.")
         creditsCheckInt = creditsCheckInt+300
         f = open((creditsCommand), "w")
         f.write(str(creditsCheckInt))
         f.close()
-        await ctx.send(f" {ctx.author.name} now has {creditsCheckInt} credits.")
+        await ctx.send(f"{ctx.author.name} now has {creditsCheckInt} credits.")
     else:
         pass
     
@@ -196,7 +196,7 @@ async def calc(ctx, calc1, calcR, calc2):
                 calcE = int(calc1) * int(calc2)
             else:
                 ErrorFree = False
-                await ctx.send(f"invalid operator @{ctx.author.name} - Possible Operators: '+' '-' ':' '*'")
+                await ctx.send(f"invalid operator {ctx.author.name} - Possible Operators: '+' '-' ':' '*'")
             if ErrorFree:
                 await ctx.send(calcE)
         else:
