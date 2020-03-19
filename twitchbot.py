@@ -1,7 +1,9 @@
 import os # for importing env vars for the bot to use
 import random
 from twitchio.ext import commands
+from dotenv import load_dotenv
 
+load_dotenv()
 CHANNEL1, CHANNEL2 = [os.environ['TWITCH_CHANNEL']] + [os.environ['TWITCH_CHANNEL2']]
 #channels = str(channels)
 channels = CHANNEL1 + ", " + CHANNEL2
