@@ -2,26 +2,33 @@ import os # for importing env vars for the bot to use
 import random
 from twitchio.ext import commands
 
-CHANNEL1, CHANNEL2 = [os.environ['CHANNEL']] + [os.environ['CHANNEL2']]
+CHANNEL1, CHANNEL2 = [os.environ['TWITCH_CHANNEL']] + [os.environ['TWITCH_CHANNEL2']]
 #channels = str(channels)
 channels = CHANNEL1 + ", " + CHANNEL2
 print("running on:", channels)
 
 bot = commands.Bot(
     # set up the bot
-    irc_token=os.environ['TMI_TOKEN'],
-    client_id=os.environ['CLIENT_ID'],
-    nick=os.environ['BOT_NICK'],
-    prefix=os.environ['BOT_PREFIX'],
+    irc_token=os.environ['TWITCH_TMI_TOKEN'],
+    client_id=os.environ['TWITCH_CLIENT_ID'],
+    nick=os.environ['TWITCH_BOT_NICK'],
+    prefix=os.environ['TWITCH_BOT_PREFIX'],
     initial_channels=[f"{CHANNEL1}", f"{CHANNEL2}"]
 )
 
-channelid=[os.environ['CHANNELID']]
+channelid=[os.environ['TWITCH_CHANNELID']]
+
+def RepresentsInt(ReprInt):
+    try: 
+        int(ReprInt)
+        return True
+    except ValueError:
+        return False
 
 @bot.event
 async def event_ready():
     'Called once when the bot goes online.'
-    print(f"{os.environ['BOT_NICK']} is online!")
+    print(f"{(os.environ['TWITCH_BOT_NICK'])} is online!")
     ws = bot._ws  # this is only needed to send messages within event_ready
     await ws.send_privmsg(f"{CHANNEL1}", f"/me is watching!")
     await ws.send_privmsg(f"{CHANNEL2}", f"/me is watching!")
@@ -72,7 +79,7 @@ async def event_message(ctx):
     #leetList = ['h4770', 'hall0']
     
     # make sure the bot ignores itself and the streamer
-    if ctx.author.name.lower() == os.environ['BOT_NICK'].lower():
+    if ctx.author.name.lower() == os.environ['TWITCH_BOT_NICK'].lower():
         return
     #elif ctx.author.name.lower() == 'zeldafanchris'.lower():
         #return
@@ -194,9 +201,16 @@ async def event(ctx, user):
         await ctx.channel.send("/me Netter Versuch, der Command ist nur für Mods :)")
 
 @bot.command(name='dice')
-async def dice(ctx):
-    dice = ['1', '2', '3', '4', '5', '6']
-    await ctx.channel.send(random.choice(dice))
+async def dice(ctx, sides):
+    if RepresentsInt(sides):
+        sides = int(sides)
+        if sides<1:
+            await ctx.send('invalid number of sides')
+        else:
+            dice = [str(random.choice(range(1, sides + 1)))]
+            await ctx.channel.send(random.choice(dice))
+    else:
+        await ctx.send("invalid input")
 
 @bot.command(name='get')
 async def get(ctx):
@@ -379,7 +393,7 @@ async def commands(ctx):
     await ctx.channel.send("/me !test")
     await ctx.channel.send("/me !calc [number] [operator] [number]")
     await ctx.channel.send("/me !operators")
-    await ctx.channel.send("/me !dice")
+    await ctx.channel.send("/me !dice [number of sides]")
 
 #async def franzosen(ctx):
 #    if "bonjour" in frG:  
