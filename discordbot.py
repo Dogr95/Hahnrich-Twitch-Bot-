@@ -274,7 +274,7 @@ async def get(ctx):
                     eventRFile = open((l), "w+")
                     eventRFile.write(str(eventRC))
                     eventRFile.close()
-                    eventRsS = l + "has participated. Balance: " + str(eventRC)
+                    eventRsS = l + " has participated. Balance: " + str(eventRC)
                     await ctx.send(eventRsS)
             else:
                 await ctx.send("Event currently not running.")
