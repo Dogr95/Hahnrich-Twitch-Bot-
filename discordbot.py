@@ -11,6 +11,21 @@ SERVER = os.getenv('DISCORD_SERVER')
 owner = os.getenv('DISCORD_OWNER')
 #client = discord.Client()
 bot = commands.Bot(command_prefix=os.getenv('DISCORD_PREFIX'))
+try:
+    eventstatus
+except NameError:
+    eventFile = open("Event", "r")
+    eventLines = eventFile.readlines()
+    for eventLine in eventLines:
+        eventstatus = str(eventLine)
+finally:
+    if eventstatus=='close':
+        eventstatus = 'closed'
+        actEv = "Event is: " + eventstatus
+        activity = discord.Game(actEv)
+    else:
+        actEv = "Event is: " + eventstatus
+        activity = discord.Game(actEv)
 
 def RepresentsInt(ReprInt):
     try: 
@@ -18,7 +33,7 @@ def RepresentsInt(ReprInt):
         return True
     except ValueError:
         return False
-
+    
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord with version: {discord.__version__}')
@@ -27,6 +42,7 @@ async def on_ready():
     print(f'{bot.user} is connected to the following server:\n'
           f'{server.name}(id: {server.id})')
 
+    await bot.change_presence(status=discord.Status.idle, activity=activity)
     members = '\n - '.join([member.name for member in server.members])
     #print(f'Server Members:\n - {members}')
 
@@ -56,6 +72,10 @@ async def on_error(event, *args, **kwargs):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have permission to use this command!')
+
+@bot.command(name='test')
+async def test(ctx):
+    await ctx.send("no u")
 
 @bot.command(name='flip', help="flips a given amount of credits, usage: !flip [amount]")
 async def flip(ctx, betAmount):
@@ -193,20 +213,34 @@ async def event(ctx, eventstatus):
             eventSF = str(eventLine)
         if eventstatus=='open' and eventSF=='open':
             await ctx.send("Event is already opened.")
+            actEv = "Event is: " + eventstatus
+            activity = discord.Game(actEv)
+            await bot.change_presence(status=discord.Status.idle, activity=activity)
         elif eventstatus=='open' and eventSF!='open':
             eventFile.close()
             eventCFile = open("Event", "w+")
             eventCFile.write(eventstatus)
             eventSs = "Event is now " + eventstatus + ". You can now enter !get to recieve 100 credits each time."
             await ctx.send(eventSs)
+            actEv = "Event is: " + eventstatus
+            activity = discord.Game(actEv)
+            await bot.change_presence(status=discord.Status.idle, activity=activity)
         elif eventstatus=='close' and eventSF=='close':
             await ctx.send(" Event is already closed")
+            eventstatus = 'closed'
+            actEv = "Event is: " + eventstatus
+            activity = discord.Game(actEv)
+            await bot.change_presence(status=discord.Status.idle, activity=activity)
         elif eventstatus=='close' and eventSF!='close':
             eventFile.close()
             eventCFile = open("Event", "w+")
             eventCFile.write(eventstatus)
             eventSsC = (f"Event is now closed ({eventstatus})")
             await ctx.send(eventSsC)
+            eventstatus = 'closed'
+            actEv = "Event is: " + eventstatus
+            activity = discord.Game(actEv)
+            await bot.change_presence(status=discord.Status.idle, activity=activity)
         else:
             await ctx.send(f"invalid input {ctx.author.name}")
 
