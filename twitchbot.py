@@ -19,6 +19,16 @@ bot = commands.Bot(
 )
 
 channelid=[os.environ['TWITCH_CHANNELID']]
+ttsCost=500
+
+greetAnswer = ['Hi! selphyHi', 'Auch hier? selphyHi', 'Lang nicht gesehen selphyHi', 'Hey, was geht? selphyHi', 'Tag, haben wir uns schonmal gesehen? selphyHi']
+greetList = ['vertik1sachse', 'vertik1geist', 'vertik1flex', 'snaqblank', 'joelucutz', 'joelucutz,', 'hello', 'hello,', 'hi', 'hi,', 'tag', 'tag,', 'hallo', 'hallo,', 'selphyhi', 'selphyhi,', 'moin', 'moin,', 'servus', 'servus,', 'grüße', 'grüße,', 'hey', 'hey,', 'sup', 'sup,', 'hay', 'hay,' 'hoi', 'hoi,']
+greetWList = ['wie gehts', 'was geht', 'und dir?', 'deine lage?']
+greetWAnswer = ['Ganz okay... hoffentlich bald Feierabend selphySweat', 'Mir gehts ganz gut und selber? selphySmug', 'Das geht dich nichts an! selphyPout', 'Meine Lage ist unbestimmt seit der Zeit in Vietnam selphySad', 'Sag du es mir selphyIq', 'Die Frage ist, wie gehts DIR? selphyAra', 'Lass dir mal ne andere Frage einfallen selphyRage']
+husoList = ['huso', 'haʟʟo', 'haʟʟo,', 'haiio', 'hailo', 'hailo,', 'halio', 'halio,', 'haiio,', 'halo', 'halo,', 'was los klaus', 'alles husos', 'husos', 'erschieß dich', 'erschiess dich', 'account vor drei minuten erstellt', 'xhuso']
+husoAnswer = ['Alles Husos, was los Klaus.', 'Account vor drei Minuten erstellt, ahja', 'ahja', 'xhuso']
+ripList = ['rip', 'rip,', 'f', 'f,', 'selphysad', 'noo', 'nooo', 'noooo']
+ripAnswer = ['F', 'NOOO', 'WHY', 'warum tust du das?', 'alles husos', 'beim nächsten mal läufts bestimmt besser']
 
 def RepresentsInt(ReprInt):
     try: 
@@ -35,33 +45,41 @@ async def event_ready():
     await ws.send_privmsg(f"{CHANNEL1}", f"/me is watching!")
     await ws.send_privmsg(f"{CHANNEL2}", f"/me is watching!")
 
-@bot.event
-async def event_join(user):
-    ej = bot._ws
-    filterUser = str(f"{user}")
-    filterUser = filterUser.replace("<User name=", "")
-    if f"channel={CHANNEL1}" in filterUser:
-        filterUser = filterUser.replace(f"channel={CHANNEL1}>", "")
-        print(f"{filterUser}joined. (JoinEvent)")
-        await ej.send_privmsg(f"{CHANNEL1}", f"/me {filterUser} joined. (JoinEvent)")
-    elif f"channel={CHANNEL2}" in filterUser:
-        filterUser = filterUser.replace(f"channel={CHANNEL2}>", "")
-        print(f"{filterUser}joined. (JoinEvent)")
-        await ej.send_privmsg(f"{CHANNEL2}", f"/me {filterUser} joined. (JoinEvent)")
-    
-@bot.event
-async def event_part(user):
-    ep = bot._ws
-    filterUserP = str(f"{user}")
-    filterUserP = filterUserP.replace("<User name=", "")
-    if f"channel={CHANNEL1}" in filterUserP:
-        filterUserP = filterUserP.replace(f"channel={CHANNEL1}>", "")
-        print(f"{filterUserP} left. (LeaveEvent)")
-        await ep.send_privmsg(f"{CHANNEL1}", f"/me {filterUserP} left. (LeaveEvent)")
-    elif f"channel={CHANNEL2}" in filterUserP:
-        filterUserP = filterUserP.replace(f"channel={CHANNEL2}>", "")
-        print(f"{filterUserP} left. (LeaveEvent)")
-        await ep.send_privmsg(f"{CHANNEL2}", f"/me {filterUserP} left. (LeaveEvent)")
+#@bot.event
+#async def event_join(user):
+#    ej = bot._ws
+#    filterUser = str(f"{user}")
+#    filterUser = filterUser.replace("<User name=", "")
+#    c1nc = CHANNEL1.lower()
+#    c2nc = CHANNEL2.lower()
+#    if f"channel={c1nc}" in filterUser:
+#        filterUser = filterUser.replace(f"channel={c1nc}>", "")
+#        print(f"{filterUser}joined. (JoinEvent)")
+#        await ej.send_privmsg(f"{c1nc}", f"/me Twitch says {filterUser} hi. (JoinEvent)")
+#    elif f"channel={c2nc}" in filterUser:
+#        filterUser = filterUser.replace(f"channel={c2nc}>", "")
+#        print(f"{filterUser}joined. (JoinEvent)")
+#        await ej.send_privmsg(f"{c2nc}", f"/me Twitch says {filterUser} hi. (JoinEvent)")
+#    else:
+#        print(f"event_join couldn't find channel")
+#    
+#@bot.event
+#async def event_part(user):
+#    ep = bot._ws
+#    filterUserP = str(f"{user}")
+#    filterUserP = filterUserP.replace("<User name=", "")
+#    c1nc2 = CHANNEL1.lower()
+#    c2nc2 = CHANNEL2.lower()
+#    if f"channel={c1nc2}" in filterUserP:
+#        filterUserP = filterUserP.replace(f"channel={c1nc2}>", "")
+#        print(f"{filterUserP} left. (LeaveEvent)")
+#        await ep.send_privmsg(f"{c1nc2}", f"/me Twitch says {filterUserP} bye. (LeaveEvent)")
+#    elif f"channel={c2nc2}" in filterUserP:
+#        filterUserP = filterUserP.replace(f"channel={c2nc2}>", "")
+#        print(f"{filterUserP} left. (LeaveEvent)")
+#        await ep.send_privmsg(f"{c2nc2}", f"/me Twitch says {filterUserP} bye. (LeaveEvent)")
+#    else:
+#        print(f"event_part couldn't find channel")
 
 @bot.event
 async def event_message(ctx):
@@ -70,15 +88,9 @@ async def event_message(ctx):
     greet = ctx.content.lower()
     stateM = ctx.content.lower()
     husoN = ctx.content.lower()
-    #leetN = ctx.content.lower()
+    ripN = ctx.content.lower()
+    ripN = greet.split(' ')
     greet = greet.split(' ')
-    greetAnswer = ['Hi! HeyGuys', 'Auch hier? PogChamp', 'Lang nicht gesehen PogChamp', 'Hey, was geht?', 'Tag, haben wir uns schonmal gesehen?']
-    greetList = ['dogr7sachse', 'dogr7geist', 'dogr7flex', 'snaqblank', 'joelucutz', 'joelucutz,', 'hello', 'hello,', 'hi', 'hi,', 'tag', 'tag,', 'hallo', 'hallo,', 'selphyhi', 'selphyhi,', 'servus', 'servus,', 'grüße', 'grüße,', 'hey', 'hey,', 'sup', 'sup,', 'hay', 'hay,' 'hoi', 'hoi,']
-    greetWList = ['wie gehts', 'was geht', 'und dir?', 'deine lage?']
-    greetWAnswer = ['Ganz okay... hoffentlich bald Feierabend NotLikeThis', 'Mir gehts ganz gut und selber?', 'Das geht dich nichts an! selphyPout', 'Meine Lage ist unbestimmt seit der Zeit in Vietnam selphySad', 'Sag du es mir', 'Die Frage ist, wie gehts DIR?', 'Lass dir mal ne andere Frage einfallen']
-    husoList = ['huso', 'haʟʟo', 'haʟʟo,', 'haiio', 'hailo', 'hailo,', 'halio', 'halio,', 'haiio,', 'halo', 'halo,', 'was los klaus', 'alles husos', 'husos', 'erschieß dich', 'erschiess dich', 'account vor drei minuten erstellt', 'xhuso']
-    husoAnswer = ['Alles Husos, was los Klaus.', 'Account vor drei Minuten erstellt, ahja', 'ahja', 'xhuso']
-    #leetList = ['h4770', 'hall0']
     
     # make sure the bot ignores itself and the streamer
     if ctx.author.name.lower() == os.environ['TWITCH_BOT_NICK'].lower():
@@ -93,19 +105,18 @@ async def event_message(ctx):
         await ctx.channel.send(f"/me {random.choice(greetWAnswer)} @{ctx.author.name}")
     elif any(word in husoN for word in husoList):
         await ctx.channel.send(f"/me {random.choice(husoAnswer)} @{ctx.author.name}")
-    #elif any(word in leetN for word in leetList):
-        #await ctx.channel.send(f"/me {random.choice(husoAnswer)} @{ctx.author.name}")
-    
+    elif any(word in ripN for word in ripList):
+        await ctx.channel.send(f"/me {random.choice(ripAnswer)} selphySad @{ctx.author.name}")
         
 @bot.event
 async def event_command_error(ctx, error):
-    await ctx. channel.send(f'/me Error running command: {error} @{ctx.message.author.name}')
+    await ctx.channel.send(f'/me Error running command: {error} @{ctx.message.author.name}')
 
 @bot.command(name='test')
 async def test(ctx):
-    testOP = "user: " + str(ctx.author.name) + " with the id: " + str(ctx.author.id) + " ran test in channel: " + str((os.environ['CHANNEL']))
+    testOP = "user: " + str(ctx.author.name) + " with the id: " + str(ctx.author.id) + " ran test"
     print(testOP)
-    await ctx.send(testOP)
+    await ctx.channel.send(testOP)
 
 @bot.command(name='calc')
 async def calc(ctx):
@@ -139,6 +150,21 @@ async def calc(ctx):
         else:
             await ctx.channel.send("Invalid syntax")
 
+@bot.command(name='marry')
+async def marry(ctx):
+    mchoices = ['yes'] * 1 + ['no'] * 99
+    myes = random.choice(mchoices)
+    if myes=='yes':
+        with open("marry", "w+") as marryF:
+            marryF.write(f"{ctx.author.name}")
+            await ctx.channel.send(f"YES I WILL selphyPog @{ctx.author.name}")
+    elif myes=='no':
+        with open("marry", "r") as marryF:
+            for mcontent in marryF:
+                mpass = [f"No, never selphyPout @{ctx.author.name}", f"Not even in your dreams selphyRage @{ctx.author.name}", f"Not like this selphyPout @{ctx.author.name}", f"Get a little more creative selphyIq @{ctx.author.name}"]
+                manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
+                await ctx.channel.send(manswer)
+
 @bot.command(name='operators')
 async def operators(ctx):
     await ctx.channel.send("Possible Operators: '+' '-' ':' '*'")
@@ -151,7 +177,7 @@ async def clip(ctx):
 async def listusers(ctx):
     #Chatters = await bot.get_chatters((os.environ['CHANNEL']))
     #print(Chatters)
-    lUc = "/me {}" + str(await bot.get_chatters((os.environ['CHANNEL'])))
+    lUc = str(await bot.get_chatters((f"{CHANNEL1}")))
     lUc = lUc.replace("'", "")
     lUc = lUc.replace("(", " ")
     lUc = lUc.replace(")", "")
@@ -160,8 +186,139 @@ async def listusers(ctx):
     lUc = lUc.replace("[", "")
     lUc = lUc.replace("]", "")
     lUc = lUc.replace("Chatters count=", "Users=")
+    lUc = f"Users in channel {CHANNEL1}: " + lUc
     await ctx.channel.send(lUc)
 
+@bot.command(name='pomf')
+async def pomf(ctx):
+    liste = random.choice([greetAnswer, greetWAnswer, husoAnswer, ripAnswer])
+    listeSmol = random.choice(liste)
+    listeMessage = listeSmol + f" @{ctx.author.name} selphyHae"
+    await ctx.channel.send(listeMessage)
+
+@bot.command(name='lotto')
+async def lotto(ctx, *l):
+    lottoUser = (f"{ctx.author.name}")
+    try:
+        open((lottoUser), "r")
+    except FileNotFoundError:
+        print("Creating file...")
+        cr = open((lottoUser), "w+")
+        cr.write("1000")
+        cr.close()
+        print(f"File: {ctx.author.name} created!")
+        await ctx.channel.send(f"/me File for {ctx.author.name} created.")
+    finally:
+        lottoUserF = open((lottoUser), "r")
+        lottoUserLines = lottoUserF.readlines()
+        for lottoUserLine in lottoUserLines:
+            lottoUserFC = str(lottoUserLine)
+            lottoUserFC = int(lottoUserFC)
+            lottoUserF.close()
+            useless, *lottoG = ctx.content.split(' ')
+            if 'jackpot' in lottoG:
+                with open("jackpot", "r") as jackpotF:
+                    for jackpotL in jackpotF:
+                        jackpotL = int(jackpotL)
+                        await ctx.channel.send(f"/me Jackpot is at {jackpotL} credits. @{ctx.author.name}")
+                        lottoStatus='check'
+            elif 'jackpot' not in lottoG:
+                with open("jackpot", "r") as jackpotF:
+                    for jackpotL in jackpotF:
+                        jackpotL = int(jackpotL)
+                        price = 2400
+                        price = price/(len(lottoG))
+                        price = int(price)
+                        priceLoss = len(lottoG)*100
+                        lottoUserFC = lottoUserFC-priceLoss
+                        lottoN = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21')
+                        lottoR = random.choice(lottoN)
+                        lottoGAnzahl = (len(lottoG))
+                        if lottoGAnzahl== 1 and lottoR in lottoG:
+                            await ctx.channel.send(f"/me @{ctx.author.name} won the jackpot. ({jackpotL}) selphyPog")
+                            with open((lottoUser), "w+") as lottoUserF:
+                                lottoUserFC = lottoUserFC+jackpotL
+                                lottoUserFC = str(lottoUserFC)
+                                lottoUserF.write(lottoUserFC)
+                            with open("jackpot", "w+") as jackpotF3:
+                                jackpotWrite = 0
+                                jackpotF3.write(str(jackpotWrite))
+                                lottoStatus = 'jackpot'
+                        elif lottoUserFC>=priceLoss: 
+                            lottoNS = "/me Lotto Number: " + lottoR
+                            await ctx.channel.send(lottoNS)
+                            if lottoR in lottoG:
+                                lottoStatus = 'won'
+                                lottoUserFC = lottoUserFC+price
+                                lottoUserF.close()
+                                lottoUserF = open((lottoUser), "w+")
+                                lottoUserFC = str(lottoUserFC)
+                                lottoUserF.write(lottoUserFC)
+                                lottoWS = f"/me {ctx.author.name} won " + str(price) + " credits. Balance: " + str(lottoUserFC)
+                                await ctx.channel.send(lottoWS)
+                            else:
+                                lottoStatus = 'lost'
+                                lottoUserF.close()
+                                lottoUserF = open((lottoUser), "w+")
+                                lottoUserFC = str(lottoUserFC)
+                                lottoUserF.write(lottoUserFC)
+                                lottoUserF.close()
+                                lottoLS = f"/me {ctx.author.name} lost " + str(priceLoss) + " credits. Balance: " + str(lottoUserFC)
+                                await ctx.channel.send(lottoLS)
+                        else:
+                            lottoStatus = 'error'
+                            await ctx.channel.send("/me You don't have enough credits!")
+    if lottoStatus=='lost':
+        with open("jackpot", "w+") as jackpotF:
+            jackpotL = priceLoss+jackpotL
+            jackpotF.write(str(jackpotL))
+
+@bot.command(name='tts')
+async def tts(ctx, *speech):
+    ttsUser = (f"{ctx.author.name}")
+    try:
+        open((ttsUser), "r")
+    except FileNotFoundError:
+        print("Creating file...")
+        cr = open((ttsUser), "w+")
+        cr.write("1000")
+        cr.close()
+        print(f"File: {ctx.author.name} created!")
+        await ctx.channel.send(f"/me File for {ctx.author.name} created.")
+    finally:
+        ttsUserF = open((ttsUser), "r")
+        ttsUserLines = ttsUserF.readlines()
+        for ttsUserLine in ttsUserLines:
+            ttsUserFC = str(ttsUserLine)
+            ttsUserFC = int(ttsUserFC)
+            if ttsUserFC>=ttsCost:
+                ttsUserFC -= (ttsCost)
+                ttsUserFC = str(ttsUserFC)
+                ttsUserF.close()
+                ttsUserF = open((ttsUser), "w+")
+                ttsUserF.write(ttsUserFC)
+                speech = '_'.join(speech)
+                speech = speech.replace("'", "")
+                speech = speech.replace('"', '')
+                speech = speech.replace("(", "")
+                speech = speech.replace(")", "")
+                speech = speech.replace("-", "")
+                speech = speech.replace("&", "")
+                speech = speech.replace("/", "")
+                speech = speech.replace(""""\
+                                        """, "")
+                speech = speech.replace("!", "")
+                speech = speech.replace("?", "")
+                speech = speech.replace("$", "")
+                speech = speech.replace("§", "")
+                speech = speech.replace(",", "")
+                speech = speech.replace("%", "")
+                speech = speech.replace("{", "")
+                speech = speech.replace("}", "")
+                TextVar = 'espeak ' + (speech)
+                os.system(TextVar)
+            elif ttsUserFC<ttsCost:
+                await ctx.channel.send(f"/me You don't have enough credits @{ctx.author.name}")
 
 @bot.command(name='timeout')
 async def timeout(ctx, user):
@@ -251,14 +408,10 @@ async def get(ctx):
     else:
         await ctx.channel.send(f"/me Not able to participate, event closed ({eventstatusS})")
             
-
-#@bot.command(name='followage')
-#async def followage(ctx):
-    #await ctx.channel.send(await bot.get_follow(({ctx.author.id}), (channelid)))
-
 @bot.command(name='flip')
 async def flip(ctx):
     l = (f"{ctx.author.name}")
+    mf = 25 # Minimum Flip
     try:
         k = open((l), "r")
     except FileNotFoundError:
@@ -281,30 +434,63 @@ async def flip(ctx):
                 betAmount = int(betAmount)
                 VEerror = True
             except ValueError:
-                await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
                 VEerror = False
             finally:
                 if VEerror:
-                    if betAmount >= 0 :
+                    if betAmount > mf :
                         if betAmount > punkte:
                             await ctx.channel.send("/me You do not have enough credits!")
-                        elif betAmount <=punkte:
+                        elif betAmount <= punkte:
                             #define flip
                             coin = ('win', 'loss')
                             flip = random.choice(coin)
                             if flip=="win":
+                                flipStatus = 'won'
                                 punkte=punkte+betAmount
                                 meW = "/me " + l + " won, total: " + str(punkte) + " credits!"
                                 await ctx.channel.send((meW))
                             elif flip=="loss":
+                                flipStatus = 'lost'
                                 punkte=punkte-betAmount
                                 meL = "/me " + l + " lost, total: " + str(punkte) + " credits!"
                                 await ctx.channel.send((meL))
                         else:
-                            await ctx.channel.send(f"/me invalid syntaxn background @{ctx.author.name}")
+                            await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
+                    elif betAmount < mf:
+                        await ctx.channel.send(f"/me {mf} is the minimum flipable value @{ctx.author.name}")
                     else:
                         await ctx.channel.send(f"/me Positive numbers only @{ctx.author.name}")
+                elif VEerror==False:
+                    if betAmount=='all' or betAmount=='max':
+                        betAmount = punkte
+                        if betAmount >= mf:
+                            coin = ('win', 'loss')
+                            flip = random.choice(coin)
+                            if flip=="win":
+                                flipStatus = 'won'
+                                punkte=punkte+betAmount
+                                meW = f"/me @{ctx.author.name} went all in and won, total: " + str(punkte) + " credits!"
+                                await ctx.channel.send((meW))
+                            elif flip=="loss":
+                                flipStatus = 'lost'
+                                punkte=punkte-betAmount
+                                meL = f"/me @{ctx.author.name} went all in and lost, total: " + str(punkte) + " credits!"
+                                await ctx.channel.send((meL))
+                        elif betAmount < mf:
+                            await ctx.channel.send(f"/me {mf} is the minimum flipable value @{ctx.author.name}")
+                    else:
+                        await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
+                    
             
+        #adding lost amount to jackpot
+        if flipStatus=='lost':
+            with open("jackpot", "r") as jackpotF:
+                for jackpotL in jackpotF:
+                    jackpotL = int(jackpotL)
+                    jackpotL = betAmount+jackpotL
+                    with open("jackpot", "w+") as jackpotF2:
+                        jackpotF2.write(str(jackpotL))
+        
         #saving stats to ({ctx.author.name}) file
         f = open((l), "w")
         f.write(str(punkte))
@@ -313,6 +499,7 @@ async def flip(ctx):
 @bot.command(name='credits')
 async def credits(ctx):
     creditsCommand = (f"{ctx.author.name}")
+    pityC = 300 #Amount of Pity Credits
     try:
         creditsCommandCheck = open((creditsCommand), "r")
     except FileNotFoundError:
@@ -329,18 +516,21 @@ async def credits(ctx):
             creditsCheckInt = int(creditsLine)
             await ctx.channel.send(f"/me {ctx.author.name} has {creditsCheckInt} credits.")
     if creditsCheckInt < 100:
-        await ctx.channel.send(f"/me i felt bad for @{ctx.author.name} and gave him 300 credits.")
-        creditsCheckInt = creditsCheckInt+300
-        f = open((creditsCommand), "w")
-        f.write(str(creditsCheckInt))
-        f.close()
-        await ctx.channel.send(f"/me {ctx.author.name} now has {creditsCheckInt} credits.")
+        cchoices = ['yes'] * 20 + ['no'] * 80
+        cyes = random.choice(cchoices)
+        if cyes=='yes':
+            creditsCheckInt = creditsCheckInt+300
+            f = open((creditsCommand), "w")
+            f.write(str(creditsCheckInt))
+            f.close()
+            await ctx.channel.send(f"/me I felt bad for @{ctx.author.name} and gave him {pityC} credits. selphyPray {ctx.author.name} now has {creditsCheckInt} credits.")
     else:
         pass
 
 @bot.command(name='gift')
 async def gift(ctx):
     giftUser1 = (f"{ctx.author.name}")
+    useless, giftR, giftAmount = ctx.content.split(' ')
     try:
         giftFile = open((giftUser1), "r")
     except FileNotFoundError:
@@ -351,58 +541,96 @@ async def gift(ctx):
         print(f"File: {ctx.author.name} created!")
         await ctx.channel.send(f"/me File for {ctx.author.name} created.")
     finally:
-        giftFile = open((giftUser1), "r")
-        giftLines = giftFile.readlines()
-        for giftLine in giftLines:
-            giftC = int(giftLine)
-            useless, giftR, giftAmount = ctx.content.split(' ')
-            GRError = True
+        try:
             giftAmount = int(giftAmount)
-            if giftAmount <= giftC and giftAmount >= 0:
-                try:
-                    giftRFile = open((giftR), "r")
-                except FileNotFoundError:
-                    await ctx.channel.send(f"/me Receiving user not found or invalid amount")
-                    GRError = False
-                finally:
-                    if GRError:
-                        giftRFile = open((giftR), "r")
-                        giftRLines = giftRFile.readlines()
-                        for giftRLine in giftRLines:
-                            giftRC = int(giftRLine)
-                            giftRC = giftRC+giftAmount
-                            giftC = giftC-giftAmount
-                            giftRFile.close()
-                            giftFile.close()
-                            giftDone = open((giftUser1), "w+")
-                            giftDone.write(str(giftC))
-                            giftRDone = open((giftR), "w+")
-                            giftRDone.write(str(giftRC))
-                            await ctx.channel.send (f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR}.")
-                    else:
-                        break
-            elif giftAmount < 0:
-                await ctx.channel.send("invalid gift amount")
+            VEerror = True
+        except ValueError:
+            VEerror = False
+        finally:
+            if VEerror:
+                giftFile = open((giftUser1), "r")
+                giftLines = giftFile.readlines()
+                for giftLine in giftLines:
+                    giftC = int(giftLine)
+                    if giftAmount <= giftC and giftAmount > 0:
+                        try:
+                            giftRFile = open((giftR), "r")
+                            GRError = True
+                        except FileNotFoundError:
+                            await ctx.channel.send(f"/me Receiving user not found or invalid amount")
+                            GRError = False
+                        finally:
+                            if GRError:
+                                giftRFile = open((giftR), "r")
+                                giftRLines = giftRFile.readlines()
+                                for giftRLine in giftRLines:
+                                    giftRC = int(giftRLine)
+                                    giftRC = giftRC+giftAmount
+                                    giftC = giftC-giftAmount
+                                    giftRFile.close()
+                                    giftFile.close()
+                                    giftDone = open((giftUser1), "w+")
+                                    giftDone.write(str(giftC))
+                                    giftRDone = open((giftR), "w+")
+                                    giftRDone.write(str(giftRC))
+                                    await ctx.channel.send(f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR}.")
+                            else:
+                                break
+                    elif giftAmount <= 0:
+                        await ctx.channel.send(f"/me @{ctx.author.name} invalid gift amount")
+                    elif giftC < giftAmount:
+                        await ctx.channel.send(f"/me @{ctx.author.name} not enough credits!")
+            elif giftAmount=='all' or giftAmount=='max':
+                giftFile = open((giftUser1), "r")
+                giftLines = giftFile.readlines()
+                for giftLine in giftLines:
+                    giftC = int(giftLine)
+                    giftAmount = giftC
+                    if giftAmount > 0:
+                        try:
+                            giftRFile = open((giftR), "r")
+                            GRError = True
+                        except FileNotFoundError:
+                            await ctx.channel.send(f"/me Receiving user not found or invalid amount")
+                            GRError = False
+                        finally:
+                            if GRError:
+                                giftRFile = open((giftR), "r")
+                                giftRLines = giftRFile.readlines()
+                                for giftRLine in giftRLines:
+                                    giftRC = int(giftRLine)
+                                    giftRC = giftRC+giftAmount
+                                    giftC = giftC-giftAmount
+                                    giftRFile.close()
+                                    giftFile.close()
+                                    giftDone = open((giftUser1), "w+")
+                                    giftDone.write(str(giftC))
+                                    giftRDone = open((giftR), "w+")
+                                    giftRDone.write(str(giftRC))
+                                    await ctx.channel.send(f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR}.")
+                            else:
+                                break
+                    elif giftAmount <= 0:
+                        await ctx.channel.send(f"/me @{ctx.author.name} you're broke selphyLUL")
+            elif VEerror==False:
+                await ctx.channel.send(f"/me @{ctx.author.name} thats not a number! selphyPout")
 
 @bot.command(name='commands')
 async def commands(ctx):
-    await ctx.channel.send("/me !flip [betAmount]")
-    await ctx.channel.send("/me !gift [user] [giftAmount]")
-    await ctx.channel.send("/me !credits")
-    await ctx.channel.send("/me (mod-only) !timeout [user] [time] [reason]")
-    await ctx.channel.send("/me !listusers")
-    await ctx.channel.send("/me (broken) !clip")
-    await ctx.channel.send("/me !test")
-    await ctx.channel.send("/me !calc [number] [operator] [number]")
-    await ctx.channel.send("/me !operators")
-    await ctx.channel.send("/me !dice [number of sides]")
-
-#async def franzosen(ctx):
-#    if "bonjour" in frG:  
-#        await ctx.channel.send(f"huso, keine franzsosen in diesem stream DansGame")
-#        franzosen = str(ctx.author.name)
-#        await ctx.timeout((franzosen), int(60), str("Keine Franzosen")) #Timeout 60 Sekunden
+    cS = "Commands: "
+    cL = []
+    for c in bot.commands:
+        cA = "!" + c
+        cL.append(cA)
+    cL = str(cL)
+    cL = cL.replace("[", "")
+    cL = cL.replace("]", "")
+    cL = cL.replace("'", "")
+    await ctx.channel.send(cS + str(cL))
     
+########################################
+#    Starts the bot                    #
+########################################
 
 if __name__ == "__main__":
     bot.run()
