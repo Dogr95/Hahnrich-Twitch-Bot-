@@ -259,9 +259,27 @@ async def credits(ctx):
     
 @bot.command(name='tts', help='testing purposes only. (Sachsen-only)')
 @commands.has_role('Sachsen')
-async def tts(ctx, TextVar):
-    TextVar = 'espeak ' + (TextVar)
-    os.system(TextVar)
+async def tts(ctx, *speech):
+    speech = '_'.join(speech)
+    speech = speech.replace("'", "")
+    speech = speech.replace('"', '')
+    speech = speech.replace("(", "")
+    speech = speech.replace(")", "")
+    speech = speech.replace("-", "")
+    speech = speech.replace("&", "")
+    speech = speech.replace("/", "")
+    speech = speech.replace(""""\
+                            """, "")
+    speech = speech.replace("!", "")
+    speech = speech.replace("?", "")
+    speech = speech.replace("$", "")
+    speech = speech.replace("§", "")
+    speech = speech.replace(",", "")
+    speech = speech.replace("%", "")
+    speech = speech.replace("{", "")
+    speech = speech.replace("}", "")
+    speech = 'espeak ' + (speech)
+    os.system(speech)
 
 @bot.command(name='dice', help='roll the dice, usage: !dice [number of sides]')
 async def dice(ctx, sides):
