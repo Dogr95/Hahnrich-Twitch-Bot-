@@ -154,16 +154,20 @@ async def calc(ctx):
 async def marry(ctx):
     mchoices = ['yes'] * 1 + ['no'] * 99
     myes = random.choice(mchoices)
-    if myes=='yes':
-        with open("marry", "w+") as marryF:
-            marryF.write(f"{ctx.author.name}")
-            await ctx.channel.send(f"YES I WILL selphyPog @{ctx.author.name}")
-    elif myes=='no':
-        with open("marry", "r") as marryF:
-            for mcontent in marryF:
-                mpass = [f"No, never selphyPout @{ctx.author.name}", f"Not even in your dreams selphyRage @{ctx.author.name}", f"Not like this selphyPout @{ctx.author.name}", f"Get a little more creative selphyIq @{ctx.author.name}"]
-                manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
-                await ctx.channel.send(manswer)
+    with open("marry", "r") as marryF:
+        for mcontent in marryF:
+            if mcontent==f"{ctx.author.name}":
+                await ctx.channel.send(f"/me @{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
+            elif myes=='yes':
+                with open("marry", "w+") as marryF:
+                    marryF.write(f"{ctx.author.name}")
+                    await ctx.channel.send(f"/me YES I WILL selphyPog @{ctx.author.name}")
+            elif myes=='no':
+                with open("marry", "r") as marryF:
+                    for mcontent in marryF:
+                        mpass = [f"/me No, never selphyPout @{ctx.author.name}", f"/me Not even in your dreams selphyRage @{ctx.author.name}", f"/me Not like this selphyPout @{ctx.author.name}", f"/me Get a little more creative selphyIQ @{ctx.author.name}"]
+                        manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
+                        await ctx.channel.send(manswer)
 
 @bot.command(name='operators')
 async def operators(ctx):
@@ -193,7 +197,7 @@ async def listusers(ctx):
 async def pomf(ctx):
     liste = random.choice([greetAnswer, greetWAnswer, husoAnswer, ripAnswer])
     listeSmol = random.choice(liste)
-    listeMessage = listeSmol + f" @{ctx.author.name} selphyHae"
+    listeMessage = "/me " + listeSmol + f" @{ctx.author.name} selphyHae"
     await ctx.channel.send(listeMessage)
 
 @bot.command(name='lotto')
@@ -439,6 +443,7 @@ async def flip(ctx):
                 if VEerror:
                     if betAmount > mf :
                         if betAmount > punkte:
+                            flipStatus = 'error'
                             await ctx.channel.send("/me You do not have enough credits!")
                         elif betAmount <= punkte:
                             #define flip
@@ -455,10 +460,13 @@ async def flip(ctx):
                                 meL = "/me " + l + " lost, total: " + str(punkte) + " credits!"
                                 await ctx.channel.send((meL))
                         else:
+                            flipStatus = 'error'
                             await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
                     elif betAmount < mf:
+                        flipStatus = 'error'
                         await ctx.channel.send(f"/me {mf} is the minimum flipable value @{ctx.author.name}")
                     else:
+                        flipStatus = 'error'
                         await ctx.channel.send(f"/me Positive numbers only @{ctx.author.name}")
                 elif VEerror==False:
                     if betAmount=='all' or betAmount=='max':
@@ -477,8 +485,10 @@ async def flip(ctx):
                                 meL = f"/me @{ctx.author.name} went all in and lost, total: " + str(punkte) + " credits!"
                                 await ctx.channel.send((meL))
                         elif betAmount < mf:
+                            flipStatus = 'error'
                             await ctx.channel.send(f"/me {mf} is the minimum flipable value @{ctx.author.name}")
                     else:
+                        flipStatus = 'error'
                         await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
                     
             
@@ -617,7 +627,7 @@ async def gift(ctx):
 
 @bot.command(name='commands')
 async def commands(ctx):
-    cS = "Commands: "
+    cS = "/me Commands: "
     cL = []
     for c in bot.commands:
         cA = "!" + c
