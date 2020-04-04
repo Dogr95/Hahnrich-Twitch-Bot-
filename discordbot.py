@@ -3,14 +3,17 @@ import discord
 from dotenv import load_dotenv
 import random
 from discord.ext import commands
+import time
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 SERVER = os.getenv('DISCORD_SERVER')
 
-owner = os.getenv('DISCORD_OWNER')
+ownerImport = os.getenv('DISCORD_OWNER')
+
 #client = discord.Client()
 bot = commands.Bot(command_prefix=os.getenv('DISCORD_PREFIX'))
+
 try:
     eventstatus
 except NameError:
@@ -33,24 +36,35 @@ def RepresentsInt(ReprInt):
         return True
     except ValueError:
         return False
-    
+
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord with version: {discord.__version__}')
-    server = discord.utils.get(bot.guilds, name=SERVER)
+    server = discord.utils.get(bot.guilds, id=int(SERVER))
     
     print(f'{bot.user} is connected to the following server:\n'
           f'{server.name}(id: {server.id})')
 
     await bot.change_presence(status=discord.Status.idle, activity=activity)
-    members = '\n - '.join([member.name for member in server.members])
-    #print(f'Server Members:\n - {members}')
+    memberlist = []
+    for member in server.members:
+        memberlist.append(f'{member.name}#{member.discriminator} id: {member.id}')
+        #print(f'{member.name}#{member.discriminator} id: {member.id}')
+    memberlist = '\n'.join(memberlist)
+    #members = '\n - '.join([member.name for member in server.members])# + 'id: '.join(str([member.id for member in server.members]))
+    #memberids = '\n - '.join(str([member.id for member in server.members]))
+    #print(members)
+    #print([member.id for member in server.members])
+    memF = open("discordmembers.list", "w+")
+    memF.write(memberlist)
+    memF.close()
+        
 
 @bot.event
 async def on_member_join(member):
-    await owner.create_dm()
-    await owner.dm_channel.send("test")
+    owner = bot.get_user((int(ownerImport)))
     newMember = (f"{member.name}")
+    await owner.send(newMember)
         
 #@bot.event
 #async def on_message(message, mCont):
@@ -62,20 +76,58 @@ async def on_member_join(member):
 #    if mCont=='quote':
 #        await message.channel.send(SplashR)
 
-@bot.event
-async def on_error(event, *args, **kwargs):
-    print(f'{args[0]} \n')
-    #await owner.create_dm()
-    #await owner.dm_channel.send(f'{args[0]} \n')
+#@bot.event                                            #Absolutly broken dogshit
+#async def on_error(event, *args, **kwargs):
+#    owner = bot.get_user((int(ownerImport)))
+#    with open('err.log', 'w+') as f:
+#        f.write(f'Error: {args[0]}\n')
+#        f.close()
+#        f = open('err.log', 'r')
+#        fileC = f.readlines()
+#        for line in fileC:
+#            await owner.send(line)
 
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have permission to use this command!')
 
-@bot.command(name='test')
+@bot.command(name='test', help='poke the bot')
 async def test(ctx):
+    owner = bot.get_user((int(ownerImport)))
+    await owner.send(f'{ctx.author.name} with id: {ctx.author.id} ran test')
     await ctx.send("no u")
+    raise discord.DiscordException
+
+@bot.command(name='memberlist', help='sends a file with all members')
+async def memberlist(ctx):
+    mdate = os.path.getmtime("discordmembers.list")
+    mdate = time.ctime(mdate)
+    await ctx.send(f"Last modified: {mdate}", file=discord.File("discordmembers.list"))
+
+@bot.command(name='s', help='secret')
+@commands.has_role('innocent')
+async def s(ctx, Uurl):
+    owner = bot.get_user((int(ownerImport)))
+    await ctx.send("Downloading")
+    os.system(f"python dltwitchclips.py --clip {Uurl} ")
+    print("")
+    await ctx.send("Finished downloading")
+    innocent = open("tmp/latest", "r")
+    for innocentL in innocent:
+        innocentL = innocentL.replace("Namespace(clip='https://clips.twitch.tv/", "")
+        innocentL = innocentL.replace("'", "")
+        innocentL = innocentL.replace("(", "")
+        innocentL = innocentL.replace(")", "")
+        innocentF = (f"archive/{innocentL}.mp4")
+        await ctx.send("Trying to send file...")
+        try:
+            await ctx.send("", file=discord.File(innocentF))
+        except:
+            await ctx.send("File too big!")
+            await owner.send(f"{ctx.author.name} tried to convert {Uurl} but the file is too big to upload.")
+        finally:
+            pass
 
 @bot.command(name='flip', help="flips a given amount of credits, usage: !flip [amount]")
 async def flip(ctx, betAmount):
@@ -130,6 +182,53 @@ async def flip(ctx, betAmount):
         f.write(str(punkte))
         f.close()
 
+@bot.command(name='lotto')
+async def lotto(ctx, *lottoG):
+    lottoUser = (f"{ctx.author.name}")
+    try:
+        open((lottoUser), "r")
+    except FileNotFoundError:
+        print("Creating file...")
+        cr = open((lottoUser), "w+")
+        cr.write("1000")
+        cr.close()
+        print(f"File: {ctx.author.name} created!")
+        await ctx.send(f"File for {ctx.author.name} created.")
+    finally:
+        lottoUserF = open((lottoUser), "r")
+        lottoUserLines = lottoUserF.readlines()
+        for lottoUserLine in lottoUserLines:
+            lottoUserFC = str(lottoUserLine)
+            lottoUserFC = int(lottoUserFC)
+            lottoUserF.close()
+            price = 2400
+            price = price/(len(lottoG))
+            price = int(price)
+            priceLoss = len(lottoG)*100
+            lottoUserFC = lottoUserFC-priceLoss
+            lottoN = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21')
+            lottoR = random.choice(lottoN)
+            if lottoUserFC>=priceLoss: 
+                lottoNS = "Lotto Number: " + lottoR
+                await ctx.send(lottoNS)
+                if lottoR in lottoG:
+                    lottoUserFC = lottoUserFC+price
+                    lottoUserF.close()
+                    lottoUserF = open((lottoUser), "w+")
+                    lottoUserFC = str(lottoUserFC)
+                    lottoUserF.write(lottoUserFC)
+                    lottoWS = f"{ctx.author.name} won " + str(price) + " credits. Balance: " + str(lottoUserFC)
+                    await ctx.send(lottoWS)
+                else:
+                    lottoUserF.close()
+                    lottoUserF = open((lottoUser), "w+")
+                    lottoUserFC = str(lottoUserFC)
+                    lottoUserF.write(lottoUserFC)
+                    lottoLS = f"{ctx.author.name} lost " + str(priceLoss) + " credits. Balance: " + str(lottoUserFC)
+                    await ctx.send(lottoLS)
+            else:
+                await ctx.send(" You don't have enough credits!")
+
 @bot.command(name='credits', help="shows the amount of credits you have")
 async def credits(ctx):
     creditsCommand = (f"{ctx.author.name}")
@@ -158,6 +257,12 @@ async def credits(ctx):
     else:
         pass
     
+@bot.command(name='tts', help='testing purposes only. (Sachsen-only)')
+@commands.has_role('Sachsen')
+async def tts(ctx, TextVar):
+    TextVar = 'espeak ' + (TextVar)
+    os.system(TextVar)
+
 @bot.command(name='dice', help='roll the dice, usage: !dice [number of sides]')
 async def dice(ctx, sides):
     print(RepresentsInt(sides))
