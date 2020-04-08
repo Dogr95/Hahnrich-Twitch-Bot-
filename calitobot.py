@@ -54,10 +54,10 @@ async def r(ctx):
         removeR = ctx.content
         if str(ctx.author.name) != 'vertikarl':
             removeR = removeR.replace("!gift", "Keine Berechtigung: !gift")
-            removeR = removeR.replace("!r", "")
+            removeR = removeR.replace("!r ", "")
             await ctx.channel.send(removeR)
         elif str(ctx.author.name) == 'vertikarl':
-            removeR = removeR.replace("!r", "")
+            removeR = removeR.replace("!r ", "")
             await ctx.channel.send(removeR)
     
 @bot.command(name='checkerrors')
