@@ -50,7 +50,7 @@ async def c(ctx):
 
 @bot.command(name='r')
 async def r(ctx):
-    if str(ctx.author.name) == 'vertikarl' or str(ctx.author.name) == 'vertikarl' or str(ctx.author.name) == 'calitobundo':
+    if str(ctx.author.name) == 'vertikarl' or str(ctx.author.name) == 'vertikarl' or str(ctx.author.name) == 'vertikarl':
         removeR = ctx.content
         if str(ctx.author.name) != 'vertikarl':
             removeR = removeR.replace("!gift", "Keine Berechtigung: !gift")
@@ -80,6 +80,16 @@ async def checkerrors(ctx):
                 errormessage = "/me " + str(errorcount) + " errors have been logged. " + str(wnf) + " were CommandNotFound errors"
                 await ctx.channel.send(errormessage)
 
+@bot.command(name='plsdont')
+async def plsdont(ctx):
+    if (ctx.author.name) == 'vertikarl':
+        x=10
+        while x>0:
+            x = x-1
+            await ctx.channel.send("!f 5000")
+    elif (ctx.author.name) != 'vertikarl':
+        print(f"/me no permission to use this command @{ctx.author.name}")
+    
 ########################################
 #    Starts the bot                    #
 ########################################
