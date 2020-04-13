@@ -4,6 +4,7 @@ from twitchio.ext import commands
 from dotenv import load_dotenv
 import asyncio
 import datetime as DT
+import json
 
 load_dotenv()
 CHANNEL1, CHANNEL2 = [os.environ['TWITCH_CHANNEL']] + [os.environ['TWITCH_CHANNEL2']]
@@ -176,11 +177,12 @@ async def calc(ctx):
                 calcE = int(calc1) * int(calc2)
             else:
                 ErrorFree = False
-                await ctx.channel.send(f"invalid operator @{ctx.author.name} - Possible Operators: '+' '-' ':' '*'")
+                await ctx.channel.send(f"/me invalid operator @{ctx.author.name} - Possible Operators: '+' '-' ':' '*'")
             if ErrorFree:
-                await ctx.channel.send(calcE)
+                calcSend = "/me The Result is: " + str(calcE) + f" @{ctx.author.name}"
+                await ctx.channel.send(calcSend)
         else:
-            await ctx.channel.send("Invalid syntax")
+            await ctx.channel.send(f"/me Invalid syntax @{ctx.author.name}")
 
 @bot.command(name='marry')
 async def marry(ctx):
@@ -308,128 +310,207 @@ async def pomf(ctx):
     await ctx.channel.send(listeMessage)
 
 @bot.command(name='lotto')
-async def lotto(ctx, *l):
-    lottoUser = (f"{ctx.author.name}")
-    try:
-        open((lottoUser), "r")
-    except FileNotFoundError:
-        print("Creating file...")
-        cr = open((lottoUser), "w+")
-        cr.write("1000")
-        cr.close()
-        print(f"File: {ctx.author.name} created!")
-        await ctx.channel.send(f"/me File for {ctx.author.name} created.")
-    finally:
-        lottoUserF = open((lottoUser), "r")
-        lottoUserLines = lottoUserF.readlines()
-        for lottoUserLine in lottoUserLines:
-            lottoUserFC = str(lottoUserLine)
-            lottoUserFC = int(lottoUserFC)
-            lottoUserF.close()
-            useless, *lottoG = ctx.content.split(' ')
-            if 'jackpot' in lottoG:
-                with open("jackpot", "r") as jackpotF:
-                    for jackpotL in jackpotF:
-                        jackpotL = int(jackpotL)
-                        await ctx.channel.send(f"/me Jackpot is at {jackpotL} credits. @{ctx.author.name}")
-                        lottoStatus='check'
-            elif 'jackpot' not in lottoG:
-                with open("jackpot", "r") as jackpotF:
-                    for jackpotL in jackpotF:
-                        jackpotL = int(jackpotL)
-                        price = 2400
-                        price = price/(len(lottoG))
-                        price = int(price)
-                        priceLoss = len(lottoG)*100
-                        lottoUserFC = lottoUserFC-priceLoss
-                        lottoN = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21')
-                        lottoR = random.choice(lottoN)
-                        lottoGAnzahl = (len(lottoG))
-                        if lottoUserFC>=priceLoss: 
-                            lottoNS = "/me Lotto Number: " + lottoR
-                            await ctx.channel.send(lottoNS)
-                            if lottoGAnzahl== 1 and lottoR in lottoG:
-                                await ctx.channel.send(f"/me @{ctx.author.name} won the jackpot. ({jackpotL}) selphyPog")
-                                with open((lottoUser), "w+") as lottoUserF:
-                                    lottoUserFC = lottoUserFC+jackpotL
-                                    lottoUserFC = str(lottoUserFC)
-                                    lottoUserF.write(lottoUserFC)
-                                with open("jackpot", "w+") as jackpotF3:
-                                    jackpotWrite = 0
-                                    jackpotF3.write(str(jackpotWrite))
-                                    lottoStatus = 'jackpot'
-                            elif lottoGAnzahl != 1 and lottoR in lottoG:
-                                lottoStatus = 'won'
-                                lottoUserFC = lottoUserFC+price
-                                lottoUserF.close()
-                                lottoUserF = open((lottoUser), "w+")
-                                lottoUserFC = str(lottoUserFC)
-                                lottoUserF.write(lottoUserFC)
-                                lottoWS = f"/me {ctx.author.name} won " + str(price) + " credits. Balance: " + str(lottoUserFC)
-                                await ctx.channel.send(lottoWS)
+async def lotto(ctx):
+    balance = 5000 #Default balance for newly added users
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+    
+    partner = None
+    user = {'name': ctx.author.name.lower(),
+        'id': ctx.author.id,
+        'balance': balance,
+        'partner': partner
+        }
+
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+        
+    for item in entry:
+        if item['id'] == user['id']:
+            user['balance'] = item['balance']
+
+    for item in entry:
+        if item['id'] == user['id']:
+            if partner=='t':
+                entry.remove(item)
+            else:
+                Partner = item['partner']
+                User = item['name']
+                ID = item['id']
+                Balance = item['balance']
+                #change name if user changed name
+                if user['name'] != User:
+                    User = user['name']
+                lottoUser = User
+                lottoUserFC = Balance
+                useless, *lottoG = ctx.content.split(' ')
+                if 'jackpot' in lottoG:
+                    with open("jackpot", "r") as jackpotF:
+                        for jackpotL in jackpotF:
+                            jackpotL = int(jackpotL)
+                            await ctx.channel.send(f"/me Jackpot is at {jackpotL} credits. @{ctx.author.name}")
+                            lottoStatus='check'
+                elif 'jackpot' not in lottoG:
+                    with open("jackpot", "r") as jackpotF:
+                        for jackpotL in jackpotF:
+                            jackpotL = int(jackpotL)
+                            price = 2400
+                            price = price/(len(lottoG))
+                            price = int(price)
+                            priceLoss = len(lottoG)*100
+                            lottoUserFC = lottoUserFC-priceLoss
+                            lottoN = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21')
+                            lottoR = random.choice(lottoN)
+                            lottoGAnzahl = (len(lottoG))
+                            if lottoUserFC>=priceLoss: 
+                                lottoNS = "/me Lotto Number: " + lottoR
+                                await ctx.channel.send(lottoNS)
+                                if lottoGAnzahl== 1 and lottoR in lottoG:
+                                    await ctx.channel.send(f"/me @{ctx.author.name} won the jackpot. ({jackpotL}) selphyPog")
+                                    with open((lottoUser), "w+") as lottoUserF:
+                                        lottoUserFC = lottoUserFC+jackpotL
+                                        lottoUserFC = str(lottoUserFC)
+                                        lottoUserF.write(lottoUserFC)
+                                    with open("jackpot", "w+") as jackpotF3:
+                                        jackpotWrite = 0
+                                        jackpotF3.write(str(jackpotWrite))
+                                        lottoStatus = 'jackpot'
+                                elif lottoGAnzahl != 1 and lottoR in lottoG:
+                                    lottoStatus = 'won'
+                                    lottoUserFC = lottoUserFC+price
+                                    lottoWS = f"/me {ctx.author.name} won " + str(price) + " credits. Balance: " + str(lottoUserFC)
+                                    await ctx.channel.send(lottoWS)
+                                else:
+                                    lottoStatus = 'lost'
+                                    lottoLS = f"/me {ctx.author.name} lost " + str(priceLoss) + " credits. Balance: " + str(lottoUserFC)
+                                    await ctx.channel.send(lottoLS)
                             else:
-                                lottoStatus = 'lost'
-                                lottoUserF.close()
-                                lottoUserF = open((lottoUser), "w+")
-                                lottoUserFC = str(lottoUserFC)
-                                lottoUserF.write(lottoUserFC)
-                                lottoUserF.close()
-                                lottoLS = f"/me {ctx.author.name} lost " + str(priceLoss) + " credits. Balance: " + str(lottoUserFC)
-                                await ctx.channel.send(lottoLS)
-                        else:
-                            lottoStatus = 'error'
-                            await ctx.channel.send("/me You don't have enough credits!")
-    if lottoStatus=='lost':
-        with open("jackpot", "w+") as jackpotF:
-            jackpotL = priceLoss+jackpotL
-            jackpotF.write(str(jackpotL))
+                                lottoStatus = 'error'
+                                await ctx.channel.send("/me You don't have enough credits!")
+                Balance = lottoUserFC
+                item['name'] = str(User)
+                item['id'] = int(ID)
+                item['balance'] = int(Balance)
+                item['partner'] = Partner
+                with open("ser.json", "w") as f:
+                            o = json.dumps(ser, indent=2)
+                            f.write(o)
+                if lottoStatus=='lost':
+                    with open("jackpot", "r") as jackpotF:
+                        for jackpotL in jackpotF:
+                            jackpotL = int(jackpotL)
+                            jackpotL = priceLoss+jackpotL
+                            with open("jackpot", "w+") as jackpotF2:
+                                jackpotF2.write(str(jackpotL))
+                break
+    else:
+        item = None
+        with open("ser.json", "w") as f:
+                entry.append(user)    
+                o = json.dumps(ser, indent=2)
+                f.write(o)
+        await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
+
+@bot.command(name='del')
+async def delete(ctx, name):
+    if ctx.author.name==CHANNEL1:
+        with open("ser.json", "r") as f:
+            ser = json.load(f)
+            entry = ser['user']
+        
+        for item in entry:
+            if item['name'] == name:
+                entry.remove(item)
+                await ctx.channel.send(f'''/me User "{name}" with id {item['id']} sucessfully deleted.''')
+                break
+        else:
+            await ctx.channel.send(f'/me No user called "{name}" found to delete.')
+        with open("ser.json", "w") as f:
+            o = json.dumps(ser, indent=2)
+            f.write(o)
+    else:
+        await ctx.channel.send("/me Netter Versuch, der Command ist nur für Mods :)")
 
 @bot.command(name='tts')
 async def tts(ctx, *speech):
-    ttsUser = (f"{ctx.author.name}")
-    try:
-        open((ttsUser), "r")
-    except FileNotFoundError:
-        print("Creating file...")
-        cr = open((ttsUser), "w+")
-        cr.write("1000")
-        cr.close()
-        print(f"File: {ctx.author.name} created!")
-        await ctx.channel.send(f"/me File for {ctx.author.name} created.")
-    finally:
-        ttsUserF = open((ttsUser), "r")
-        ttsUserLines = ttsUserF.readlines()
-        for ttsUserLine in ttsUserLines:
-            ttsUserFC = str(ttsUserLine)
-            ttsUserFC = int(ttsUserFC)
-            if ttsUserFC>=ttsCost:
-                ttsUserFC -= (ttsCost)
-                ttsUserFC = str(ttsUserFC)
-                ttsUserF.close()
-                ttsUserF = open((ttsUser), "w+")
-                ttsUserF.write(ttsUserFC)
-                speech = '_'.join(speech)
-                speech = speech.replace("'", "")
-                speech = speech.replace('"', '')
-                speech = speech.replace("(", "")
-                speech = speech.replace(")", "")
-                speech = speech.replace("-", "")
-                speech = speech.replace("&", "")
-                speech = speech.replace("/", "")
-                speech = speech.replace(""""\
-                                        """, "")
-                speech = speech.replace("!", "")
-                speech = speech.replace("?", "")
-                speech = speech.replace("$", "")
-                speech = speech.replace("§", "")
-                speech = speech.replace(",", "")
-                speech = speech.replace("%", "")
-                speech = speech.replace("{", "")
-                speech = speech.replace("}", "")
-                TextVar = 'espeak ' + (speech)
-                os.system(TextVar)
-            elif ttsUserFC<ttsCost:
-                await ctx.channel.send(f"/me You don't have enough credits @{ctx.author.name}")
+    balance = 5000 #Default balance for newly added users
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+    
+    partner = None
+    user = {'name': ctx.author.name.lower(),
+        'id': ctx.author.id,
+        'balance': balance,
+        'partner': partner
+        }
+
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+        
+    for item in entry:
+        if item['id'] == user['id']:
+            user['balance'] = item['balance']
+
+    for item in entry:
+        if item['id'] == user['id']:
+            if partner=='t':
+                entry.remove(item)
+            else:
+                Partner = item['partner']
+                User = item['name']
+                ID = item['id']
+                Balance = item['balance']
+                #change name if user changed name
+                if user['name'] != User:
+                    User = user['name']
+                ttsUserFC = Balance
+                if not speech:
+                    await ctx.channel.send(f"/me Atleast one word to read required! @{ctx.author.name}")
+                else:
+                    if ttsUserFC>=ttsCost:
+                        ttsUserFC -= ttsCost
+                        speech = '_'.join(speech)
+                        speech = speech.replace("'", "")
+                        speech = speech.replace('"', '')
+                        speech = speech.replace("(", "")
+                        speech = speech.replace(")", "")
+                        speech = speech.replace("-", "")
+                        speech = speech.replace("&", "")
+                        speech = speech.replace("/", "")
+                        speech = speech.replace(""""\
+                                                """, "")
+                        speech = speech.replace("!", "")
+                        speech = speech.replace("?", "")
+                        speech = speech.replace("$", "")
+                        speech = speech.replace("§", "")
+                        speech = speech.replace(",", "")
+                        speech = speech.replace("%", "")
+                        speech = speech.replace("{", "")
+                        speech = speech.replace("}", "")
+                        TextVar = 'espeak ' + (speech)
+                        os.system(TextVar)
+                    elif ttsUserFC<ttsCost:
+                        await ctx.channel.send(f"/me You don't have enough credits @{ctx.author.name}")
+                Balance = ttsUserFC
+                item['name'] = str(User)
+                item['id'] = int(ID)
+                item['balance'] = int(Balance)
+                item['partner'] = Partner
+                with open("ser.json", "w") as f:
+                            o = json.dumps(ser, indent=2)
+                            f.write(o)
+                break
+    else:
+        item = None
+        with open("ser.json", "w") as f:
+                entry.append(user)    
+                o = json.dumps(ser, indent=2)
+                f.write(o)
+        await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
 
 @bot.command(name='timeout')
 async def timeout(ctx, user):
@@ -472,157 +553,256 @@ async def event(ctx, user):
 
 @bot.command(name='dice')
 async def dice(ctx, sides):
-    if RepresentsInt(sides):
-        sides = int(sides)
-        if sides<1:
-            await ctx.send(f'/me @{ctx.author.name} invalid number of sides')
-        else:
-            dice = str(random.choice(range(1, sides + 1)))
-            if sides>1 and int(dice) == int(sides):
-                reward = 50 * int(sides) # amount of credits earned per side
-                with open((ctx.author.name), "r") as howmuchfile:
-                    userCurrency = howmuchfile.readline()
-                    userCurrency = int(userCurrency) + reward
-                with open((ctx.author.name), "w+") as howmuchfile:
-                    howmuchfile.write(str(userCurrency))
-                diceMessage = f"/me @{ctx.author.name} " + str(dice) + f" is the same number as the number of sides, congrats take these {reward} credits. selphyPray"
-                await ctx.channel.send(diceMessage)
-            elif dice != sides:
-                diceMessage = f"/me @{ctx.author.name} Your number is: " + dice
-                await ctx.channel.send(diceMessage)
+    balance = 5000 #Default balance for newly added users
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+    
+    partner = None
+    user = {'name': ctx.author.name.lower(),
+        'id': ctx.author.id,
+        'balance': balance,
+        'partner': partner
+        }
+
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+        
+    for item in entry:
+        if item['id'] == user['id']:
+            user['balance'] = item['balance']
+
+    for item in entry:
+        if item['id'] == user['id']:
+            if partner=='t':
+                entry.remove(item)
+            else:
+                Partner = item['partner']
+                User = item['name']
+                ID = item['id']
+                Balance = item['balance']
+                #change name if user changed name
+                if user['name'] != User:
+                    User = user['name']
+                userCurrency = Balance
+                if RepresentsInt(sides):
+                    sides = int(sides)
+                    if sides<1:
+                        await ctx.send(f'/me @{ctx.author.name} invalid number of sides')
+                    else:
+                        dice = str(random.choice(range(1, sides + 1)))
+                        if sides>1 and int(dice) == int(sides):
+                            reward = 50 * int(sides) # amount of credits earned per side
+                            userCurrency = int(userCurrency) + reward
+                            diceMessage = f"/me @{ctx.author.name} " + str(dice) + f" is the same number as the number of sides, congrats take these {reward} credits. selphyPray"
+                            await ctx.channel.send(diceMessage)
+                        elif dice != sides:
+                            diceMessage = f"/me @{ctx.author.name} Your number is: " + dice
+                            await ctx.channel.send(diceMessage)
+                else:
+                    await ctx.channel.send("invalid input")
+                Balance = userCurrency
+                item['name'] = str(User)
+                item['id'] = int(ID)
+                item['balance'] = int(Balance)
+                item['partner'] = Partner
+                with open("ser.json", "w") as f:
+                            o = json.dumps(ser, indent=2)
+                            f.write(o)
+                break
     else:
-        await ctx.channel.send("invalid input")
+        item = None
+        with open("ser.json", "w") as f:
+                entry.append(user)    
+                o = json.dumps(ser, indent=2)
+                f.write(o)
+        await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
 
 @bot.command(name='get')
 async def get(ctx):
-    eventstatusF = open("Event", "r")
-    eventstatusLines = eventstatusF.readlines()
-    for eventstatusLine in eventstatusLines:
-        eventstatusS = str(eventstatusLine)
-    if eventstatusS=='open':
-        l = (f"{ctx.author.name}")
-        try:
-            open((l), "r")
-        except FileNotFoundError:
-            print("Creating file...")
-            cr = open((l), "w+")
-            cr.write("1000")
-            cr.close()
-            print(f"File: {ctx.author.name} created!")
-            await ctx.channel.send(f"/me File for {ctx.author.name} created.")
-        finally:
-            if eventstatusS=='close':
-                await ctx.channel.send("/me Event currently not running.")
-            if eventstatusS == 'open':
-                eventRFile = open((l), "r")
-                eventRLines = eventRFile.readlines()
-                for eventRLine in eventRLines:
-                    eventRC = int(eventRLine)
-                    eventRC = eventRC+100
-                    eventRFile.close()
-                    eventRFile = open((l), "w+")
-                    eventRFile.write(str(eventRC))
-                    eventRFile.close()
-                    eventRsS = "/me " + l + " has participated. Balance: " + str(eventRC)
-                    await ctx.channel.send(eventRsS)
+    balance = 5000 #Default balance for newly added users
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+    
+    partner = None
+    user = {'name': ctx.author.name.lower(),
+        'id': ctx.author.id,
+        'balance': balance,
+        'partner': partner
+        }
+
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+        
+    for item in entry:
+        if item['id'] == user['id']:
+            user['balance'] = item['balance']
+
+    for item in entry:
+        if item['id'] == user['id']:
+            if partner=='t':
+                entry.remove(item)
             else:
-                await ctx.channel.send("/me Event currently not running.")
+                Partner = item['partner']
+                User = item['name']
+                ID = item['id']
+                Balance = item['balance']
+                #change name if user changed name
+                if user['name'] != User:
+                    User = user['name']
+                eventstatusF = open("Event", "r")
+                eventstatusLines = eventstatusF.readlines()
+                for eventstatusLine in eventstatusLines:
+                    eventstatusS = str(eventstatusLine)
+                l = user['name']
+                eventRC = Balance
+                if eventstatusS=='open':
+                    if eventstatusS=='close':
+                        await ctx.channel.send("/me Event currently not running.")
+                    if eventstatusS == 'open':
+                            eventRC = eventRC+100
+                            eventRsS = "/me " + l + " has participated. Balance: " + str(eventRC)
+                            await ctx.channel.send(eventRsS)
+                    else:
+                        await ctx.channel.send("/me Event currently not running.")
+                else:
+                    await ctx.channel.send(f"/me Not able to participate, event closed ({eventstatusS})")
+                Balance = eventRC
+                item['name'] = str(User)
+                item['id'] = int(ID)
+                item['balance'] = int(Balance)
+                item['partner'] = Partner
+                with open("ser.json", "w") as f:
+                            o = json.dumps(ser, indent=2)
+                            f.write(o)
+                break
     else:
-        await ctx.channel.send(f"/me Not able to participate, event closed ({eventstatusS})")
+        item = None
+        with open("ser.json", "w") as f:
+                entry.append(user)    
+                o = json.dumps(ser, indent=2)
+                f.write(o)
+        await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
             
 @bot.command(name='flip')
 async def flip(ctx):
-    l = (f"{ctx.author.name}")
+    balance = 5000 #Default balance for newly added users
     mf = 25 # Minimum Flip
-    try:
-        k = open((l), "r")
-    except FileNotFoundError:
-        print("Creating file...")
-        cr = open((l), "w+")
-        cr.write("1000")
-        cr.close()
-        print(f"File: {ctx.author.name} created!")
-        await ctx.channel.send(f"/me File for {ctx.author.name} created.")
-    finally:
-        k = open((l), "r")
-        lines = k.readlines()
-        punkte = 0
-        for line in lines:
-            conv_int = int(line)
-            punkte = punkte + conv_int
-            k.close()
-            useless, betAmount = ctx.content.split(' ')
-            try:
-                betAmount = int(betAmount)
-                VEerror = True
-            except ValueError:
-                VEerror = False
-            finally:
-                if VEerror:
-                    if betAmount > mf :
-                        if betAmount > punkte:
-                            flipStatus = 'error'
-                            await ctx.channel.send("/me You do not have enough credits!")
-                        elif betAmount <= punkte:
-                            #define flip
-                            coin = ('win', 'loss')
-                            flip = random.choice(coin)
-                            if flip=="win":
-                                flipStatus = 'won'
-                                punkte=punkte+betAmount
-                                meW = "/me " + l + " won, total: " + str(punkte) + " credits!"
-                                await ctx.channel.send((meW))
-                            elif flip=="loss":
-                                flipStatus = 'lost'
-                                punkte=punkte-betAmount
-                                meL = "/me " + l + " lost, total: " + str(punkte) + " credits!"
-                                await ctx.channel.send((meL))
-                        else:
-                            flipStatus = 'error'
-                            await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
-                    elif betAmount < mf:
-                        flipStatus = 'error'
-                        await ctx.channel.send(f"/me {mf} is the minimum flipable value @{ctx.author.name}")
-                    else:
-                        flipStatus = 'error'
-                        await ctx.channel.send(f"/me Positive numbers only @{ctx.author.name}")
-                elif VEerror==False:
-                    if betAmount=='all' or betAmount=='max':
-                        betAmount = punkte
-                        if betAmount >= mf:
-                            coin = ('win', 'loss')
-                            flip = random.choice(coin)
-                            if flip=="win":
-                                flipStatus = 'won'
-                                punkte=punkte+betAmount
-                                meW = f"/me @{ctx.author.name} went all in and won, total: " + str(punkte) + " credits!"
-                                await ctx.channel.send((meW))
-                            elif flip=="loss":
-                                flipStatus = 'lost'
-                                punkte=punkte-betAmount
-                                meL = f"/me @{ctx.author.name} went all in and lost, total: " + str(punkte) + " credits!"
-                                await ctx.channel.send((meL))
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+    
+    partner = None
+    user = {'name': ctx.author.name.lower(),
+        'id': ctx.author.id,
+        'balance': balance,
+        'partner': partner
+        }
+
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+        
+    for item in entry:
+        if item['id'] == user['id']:
+            user['balance'] = item['balance']
+
+    for item in entry:
+        if item['id'] == user['id']:
+            if partner=='t':
+                entry.remove(item)
+            else:
+                Partner = item['partner']
+                User = item['name']
+                ID = item['id']
+                Balance = item['balance']
+                #change name if user changed name
+                if user['name'] != User:
+                    User = user['name']
+                punkte = Balance
+                useless, betAmount = ctx.content.split(' ')
+                try:
+                    betAmount = int(betAmount)
+                    VEerror = True
+                except ValueError:
+                    VEerror = False
+                finally:
+                    if VEerror:
+                        if betAmount > mf :
+                            if betAmount > punkte:
+                                flipStatus = 'error'
+                                await ctx.channel.send("/me You do not have enough credits!")
+                            elif betAmount <= punkte:
+                                #define flip
+                                coin = ('win', 'loss')
+                                flip = random.choice(coin)
+                                if flip=="win":
+                                    flipStatus = 'won'
+                                    punkte=punkte+betAmount
+                                    meW = "/me " + user['name'] + " won, total: " + str(punkte) + " credits!"
+                                    await ctx.channel.send((meW))
+                                elif flip=="loss":
+                                    flipStatus = 'lost'
+                                    punkte=punkte-betAmount
+                                    meL = "/me " + user['name'] + " lost, total: " + str(punkte) + " credits!"
+                                    await ctx.channel.send((meL))
+                            else:
+                                flipStatus = 'error'
+                                await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
                         elif betAmount < mf:
                             flipStatus = 'error'
                             await ctx.channel.send(f"/me {mf} is the minimum flipable value @{ctx.author.name}")
-                    else:
-                        flipStatus = 'error'
-                        await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
-                    
-            
-        #adding lost amount to jackpot
-        if flipStatus=='lost':
-            with open("jackpot", "r") as jackpotF:
-                for jackpotL in jackpotF:
-                    jackpotL = int(jackpotL)
-                    jackpotL = betAmount+jackpotL
-                    with open("jackpot", "w+") as jackpotF2:
-                        jackpotF2.write(str(jackpotL))
-        
-        #saving stats to ({ctx.author.name}) file
-        f = open((l), "w")
-        f.write(str(punkte))
-        f.close()
+                        else:
+                            flipStatus = 'error'
+                            await ctx.channel.send(f"/me Positive numbers only @{ctx.author.name}")
+                    elif VEerror==False:
+                        if betAmount=='all' or betAmount=='max':
+                            betAmount = punkte
+                            if betAmount >= mf:
+                                coin = ('win', 'loss')
+                                flip = random.choice(coin)
+                                if flip=="win":
+                                    flipStatus = 'won'
+                                    punkte=punkte+betAmount
+                                    meW = f"/me @{ctx.author.name} went all in and won, total: " + str(punkte) + " credits!"
+                                    await ctx.channel.send((meW))
+                                elif flip=="loss":
+                                    flipStatus = 'lost'
+                                    punkte=punkte-betAmount
+                                    meL = f"/me @{ctx.author.name} went all in and lost, total: " + str(punkte) + " credits!"
+                                    await ctx.channel.send((meL))
+                            elif betAmount < mf:
+                                flipStatus = 'error'
+                                await ctx.channel.send(f"/me {mf} is the minimum flipable value @{ctx.author.name}")
+                        else:
+                            flipStatus = 'error'
+                            await ctx.channel.send(f"/me invalid syntax @{ctx.author.name}")
+                Balance = punkte
+                item['name'] = str(User)
+                item['id'] = int(ID)
+                item['balance'] = int(Balance)
+                item['partner'] = Partner
+                with open("ser.json", "w") as f:
+                            o = json.dumps(ser, indent=2)
+                            f.write(o)
+                if flipStatus=='lost':
+                    with open("jackpot", "r") as jackpotF:
+                        for jackpotL in jackpotF:
+                            jackpotL = int(jackpotL)
+                            jackpotL = betAmount+jackpotL
+                            with open("jackpot", "w+") as jackpotF2:
+                                jackpotF2.write(str(jackpotL))
+                break
+    else:
+        item = None
+        with open("ser.json", "w") as f:
+                entry.append(user)    
+                o = json.dumps(ser, indent=2)
+                f.write(o)
+        await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
 
 @bot.command(name='luv')
 async def luv(ctx, *luvtarget):
@@ -651,127 +831,223 @@ async def luv(ctx, *luvtarget):
 
 @bot.command(name='credits')
 async def credits(ctx):
-    creditsCommand = (f"{ctx.author.name}")
+    balance = 5000 #Default balance for newly added users
     pityC = 300 #Amount of Pity Credits
-    try:
-        creditsCommandCheck = open((creditsCommand), "r")
-    except FileNotFoundError:
-        print("Creating file...")
-        creditsCommandFile = open((creditsCommand), "w+")
-        creditsCommandFile.write("1000")
-        creditsCommandFile.close()
-        print(f"File: {ctx.author.name} created!")
-        await ctx.channel.send(f"/me File for {ctx.author.name} created.")
-    finally:
-        creditsCommandCheck = open((creditsCommand), "r")
-        creditsLines = creditsCommandCheck.readlines()
-        for creditsLine in creditsLines:
-            creditsCheckInt = int(creditsLine)
-            await ctx.channel.send(f"/me {ctx.author.name} has {creditsCheckInt} credits.")
-    if creditsCheckInt < 100:
-        cchoices = ['yes'] * 20 + ['no'] * 80
-        cyes = random.choice(cchoices)
-        if cyes=='yes':
-            creditsCheckInt = creditsCheckInt+300
-            f = open((creditsCommand), "w")
-            f.write(str(creditsCheckInt))
-            f.close()
-            await ctx.channel.send(f"/me I felt bad for @{ctx.author.name} and gave him {pityC} credits. selphyPray {ctx.author.name} now has {creditsCheckInt} credits.")
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+    
+    partner = None
+    user = {'name': ctx.author.name.lower(),
+        'id': ctx.author.id,
+        'balance': balance,
+        'partner': partner
+        }
+
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+        
+    for item in entry:
+        if item['id'] == user['id']:
+            user['balance'] = item['balance']
+
+    for item in entry:
+        if item['id'] == user['id']:
+            if partner=='t':
+                entry.remove(item)
+            else:
+                Partner = item['partner']
+                User = item['name']
+                ID = item['id']
+                Balance = item['balance']
+                #change name if user changed name
+                if user['name'] != User:
+                    User = user['name']
+                if Balance < 100:
+                    cchoices = ['yes'] * 20 + ['no'] * 80
+                    cyes = random.choice(cchoices)
+                    if cyes=='yes':
+                        Balance = Balance+300
+                        await ctx.channel.send(f"/me I felt bad for @{ctx.author.name} and gave him {pityC} credits. selphyPray {ctx.author.name} now has {Balance} credits.")
+                    else:
+                        await ctx.channel.send(f"/me @{user['name']} has {Balance} credits")
+                else:
+                    await ctx.channel.send(f"/me @{user['name']} has {Balance} credits")
+                item['name'] = str(User)
+                item['id'] = int(ID)
+                item['balance'] = int(Balance)
+                item['partner'] = Partner
+                with open("ser.json", "w") as f:
+                            o = json.dumps(ser, indent=2)
+                            f.write(o)
+                break
     else:
-        pass
+        item = None
+        with open("ser.json", "w") as f:
+                entry.append(user)    
+                o = json.dumps(ser, indent=2)
+                f.write(o)
+        await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
 
 @bot.command(name='gift')
-async def gift(ctx):
-    giftUser1 = (f"{ctx.author.name}")
-    useless, giftR, giftAmount = ctx.content.split(' ')
-    giftR = giftR.lower()
-    try:
-        giftFile = open((giftUser1), "r")
-    except FileNotFoundError:
-        print("Creating file...")
-        giftFile = open((giftUser1), "w+")
-        giftFile.write("1000")
-        giftFile.close()
-        print(f"File: {ctx.author.name} created!")
-        await ctx.channel.send(f"/me File for {ctx.author.name} created.")
-    finally:
-        try:
-            giftAmount = int(giftAmount)
-            VEerror = True
-        except ValueError:
-            VEerror = False
-        finally:
-            if VEerror:
-                giftFile = open((giftUser1), "r")
-                giftLines = giftFile.readlines()
-                for giftLine in giftLines:
-                    giftC = int(giftLine)
-                    if giftAmount <= giftC and giftAmount > 0:
-                        try:
-                            giftRFile = open((giftR), "r")
-                            GRError = True
-                        except FileNotFoundError:
-                            await ctx.channel.send(f"/me Receiving user not found or invalid amount")
-                            GRError = False
-                        finally:
-                            if GRError:
-                                giftRFile = open((giftR), "r")
-                                giftRLines = giftRFile.readlines()
-                                for giftRLine in giftRLines:
-                                    giftRC = int(giftRLine)
-                                    giftRC = giftRC+giftAmount
-                                    giftC = giftC-giftAmount
-                                    giftRFile.close()
-                                    giftFile.close()
-                                    giftDone = open((giftUser1), "w+")
-                                    giftDone.write(str(giftC))
-                                    giftRDone = open((giftR), "w+")
-                                    giftRDone.write(str(giftRC))
-                                    await ctx.channel.send(f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR}.")
-                            else:
-                                break
-                    elif giftAmount <= 0:
-                        await ctx.channel.send(f"/me @{ctx.author.name} invalid gift amount")
-                    elif giftC < giftAmount:
-                        await ctx.channel.send(f"/me @{ctx.author.name} not enough credits!")
-            elif giftAmount=='all' or giftAmount=='max':
-                giftFile = open((giftUser1), "r")
-                giftLines = giftFile.readlines()
-                for giftLine in giftLines:
-                    giftC = int(giftLine)
-                    giftAmount = giftC
-                    if giftAmount > 0:
-                        try:
-                            giftRFile = open((giftR), "r")
-                            GRError = True
-                        except FileNotFoundError:
-                            await ctx.channel.send(f"/me Receiving user not found or invalid amount")
-                            GRError = False
-                        finally:
-                            if GRError:
-                                giftRFile = open((giftR), "r")
-                                giftRLines = giftRFile.readlines()
-                                for giftRLine in giftRLines:
-                                    giftRC = int(giftRLine)
-                                    giftRC = giftRC+giftAmount
-                                    giftC = giftC-giftAmount
-                                    giftRFile.close()
-                                    giftFile.close()
-                                    giftDone = open((giftUser1), "w+")
-                                    giftDone.write(str(giftC))
-                                    giftRDone = open((giftR), "w+")
-                                    giftRDone.write(str(giftRC))
-                                    await ctx.channel.send(f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR}.")
-                            else:
-                                break
-                    elif giftAmount <= 0:
-                        await ctx.channel.send(f"/me @{ctx.author.name} you're broke selphyLUL")
-            elif VEerror==False:
-                await ctx.channel.send(f"/me @{ctx.author.name} thats not a number! selphyPout")
+async def gift(ctx, giftR, giftAmount):
+    balance = 5000 #Default balance for newly added users
+    found_user = False #Default
+    everything = False #Default
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+    
+    partner = None
+    user = {'name': ctx.author.name.lower(),
+        'id': ctx.author.id,
+        'balance': balance,
+        'partner': partner
+        }
 
-@bot.command(name='asynctest')
-async def asynccommand(ctx):
-    await ctx.channel.send("alles husos")
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+        
+    for item in entry:
+        if item['id'] == user['id']:
+            user['balance'] = item['balance']
+    for item in entry:
+        if item['name'] == giftR:
+            giftR = item
+            found_user = True
+    
+    if found_user==False:
+        await ctx.channel.send(f"/me Receiving user not found @{ctx.author.name}")
+
+    elif found_user==True:
+        for item in entry:
+            if item['id'] == user['id']:
+                if partner=='t':
+                    entry.remove(item)
+                else:
+                    Partner = item['partner']
+                    User = item['name']
+                    ID = item['id']
+                    Balance = item['balance']
+                    #change name if user changed name
+                    if user['name'] != User:
+                        User = user['name']
+                    giftLine = Balance
+                    try:
+                        int(giftAmount)
+                        VEerror = True
+                    except ValueError:
+                        VEerror = False
+                    finally:
+                        if VEerror:
+                            if not giftLine:
+                                giftC = 0
+                                giftRC = int(giftR['balance'])
+                            else:
+                                giftC = int(giftLine)
+                            if giftAmount <= giftC and giftAmount > 0:
+                                giftRC = int(giftR['balance'])
+                                giftRC = giftRC+giftAmount
+                                giftC = giftC-giftAmount
+                                await ctx.channel.send(f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR['name']}.")
+                            elif giftAmount <= 0:
+                                await ctx.channel.send(f"/me @{ctx.author.name} invalid gift amount")
+                            elif giftC < giftAmount:
+                                await ctx.channel.send(f"/me @{ctx.author.name} not enough credits!")
+                        elif giftAmount=='all' or giftAmount=='max':
+                            everything = True
+                            giftC = int(giftLine)
+                            giftAmount = giftC
+                            if giftAmount > 0:
+                                giftRC = int(giftR['balance'])
+                                giftRC = giftRC+giftAmount
+                                giftC = giftC-giftAmount
+                                await ctx.channel.send(f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR['name']}.")
+                            else:
+                                giftRC = int(giftR['balance'])
+                                giftRC = giftRC+giftAmount
+                                giftC = giftC-giftAmount
+                                await ctx.channel.send(f"/me @{ctx.author.name} you're broke selphyLUL")
+                        elif VEerror==True and giftAmount <= 0:
+                            await ctx.channel.send(f"/me @{ctx.author.name} you're broke selphyLUL")
+                        elif VEerror==False:
+                            await ctx.channel.send(f"/me @{ctx.author.name} thats not a number! selphyPout")
+                if VEerror==True or everything==True:
+                    Balance = giftC
+                    giftR['balance'] = giftRC
+                item['name'] = str(User)
+                item['id'] = int(ID)
+                item['balance'] = int(Balance)
+                item['partner'] = Partner
+                with open("ser.json", "w") as f:
+                            o = json.dumps(ser, indent=2)
+                            f.write(o)
+                break
+        else:
+            item = None
+            with open("ser.json", "w") as f:
+                    entry.append(user)    
+                    o = json.dumps(ser, indent=2)
+                    f.write(o)
+            await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
+
+@bot.command(name='json')
+async def jsoncommand(ctx):
+    balance = 5000
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+    
+    partner = None
+    user = {'name': ctx.author.name.lower(),
+        'id': ctx.author.id,
+        'balance': balance,
+        'partner': partner
+        }
+
+    with open("ser.json", "r") as f:
+        ser = json.load(f)
+        entry = ser['user']
+        
+    for item in entry:
+        if item['id'] == user['id']:
+            user['balance'] = item['balance']
+
+    for item in entry:
+        if item['id'] == user['id']:
+            if partner=='t':
+                entry.remove(item)
+            else:
+                Partner = item['partner']
+                User = item['name']
+                ID = item['id']
+                Balance = item['balance']
+                #change name if user changed name
+                if user['name'] != User:
+                    User = user['name']
+                item['name'] = str(User)
+                item['id'] = int(ID)
+                item['balance'] = int(Balance)
+                item['partner'] = Partner
+                break
+    else:
+        item = None
+        with open("ser.json", "w") as f:
+                entry.append(user)    
+                o = json.dumps(ser, indent=2)
+                f.write(o)
+    
+    try:
+        Balance
+    except:
+        Balance = balance
+    finally:
+        with open("ser.json", "w") as f:
+            o = json.dumps(ser, indent=2)
+            f.write(o)
+        await ctx.channel.send(f"/me @{user['name']} got {Balance} credits")
 
 @bot.command(name='commands')
 async def commands(ctx):
