@@ -2,6 +2,8 @@ import os # for importing env vars for the bot to use
 import random
 from twitchio.ext import commands
 from dotenv import load_dotenv
+import asyncio
+import datetime as DT
 
 load_dotenv()
 CHANNEL1, CHANNEL2 = [os.environ['TWITCH_CHANNEL']] + [os.environ['TWITCH_CHANNEL2']]
@@ -23,8 +25,8 @@ ttsCost=500
 
 greetAnswer = ['Hi! selphyHi', 'Auch hier? selphyHi', 'Lang nicht gesehen selphyHi', 'Hey, was geht? selphyHi', 'Tag, haben wir uns schonmal gesehen? selphyHi']
 greetList = ['vertik1sachse', 'vertik1geist', 'vertik1flex', 'snaqblank', 'joelucutz', 'joelucutz,', 'hello', 'hello,', 'hi', 'hi,', 'tag', 'tag,', 'hallo', 'hallo,', 'selphyhi', 'selphyhi,', 'moin', 'moin,', 'servus', 'servus,', 'grüße', 'grüße,', 'hey', 'hey,', 'sup', 'sup,', 'hay', 'hay,' 'hoi', 'hoi,']
-greetWList = ['wie gehts', 'was geht', 'und dir?', 'deine lage?']
-greetWAnswer = ['Ganz okay... hoffentlich bald Feierabend selphySweat', 'Mir gehts ganz gut und selber? selphySmug', 'Das geht dich nichts an! selphyPout', 'Meine Lage ist unbestimmt seit der Zeit in Vietnam selphySad', 'Sag du es mir selphyIq', 'Die Frage ist, wie gehts DIR? selphyAra', 'Lass dir mal ne andere Frage einfallen selphyRage']
+greetWList = ['wie gehts', 'was geht', 'und dir?', 'deine lage?', 'bei dir?']
+greetWAnswer = ['Ganz okay... hoffentlich bald Feierabend selphySweat', 'Mir gehts ganz gut und selber? selphySmug', 'Das geht dich nichts an! selphyPout', 'Meine Lage ist unbestimmt seit der Zeit in Vietnam selphySad', 'Sag du es mir selphyIQ', 'Die Frage ist, wie gehts DIR? selphyAra', 'Lass dir mal ne andere Frage einfallen selphyRage']
 husoList = ['huso', 'haʟʟo', 'haʟʟo,', 'haiio', 'hailo', 'hailo,', 'halio', 'halio,', 'haiio,', 'halo', 'halo,', 'was los klaus', 'alles husos', 'husos', 'erschieß dich', 'erschiess dich', 'account vor drei minuten erstellt', 'xhuso']
 husoAnswer = ['Alles Husos, was los Klaus.', 'Account vor drei Minuten erstellt, ahja', 'ahja', 'xhuso']
 ripList = ['rip', 'rip,', 'f', 'f,', 'selphysad', 'noo', 'nooo', 'noooo']
@@ -55,11 +57,11 @@ async def event_ready():
 #    if f"channel={c1nc}" in filterUser:
 #        filterUser = filterUser.replace(f"channel={c1nc}>", "")
 #        print(f"{filterUser}joined. (JoinEvent)")
-#        await ej.send_privmsg(f"{c1nc}", f"/me Twitch says {filterUser} hi. (JoinEvent)")
+#        await ej.send_privmsg(f"{c1nc}", f"/me Twitch says {filterUser} hi. selphyHi (JoinEvent)")
 #    elif f"channel={c2nc}" in filterUser:
 #        filterUser = filterUser.replace(f"channel={c2nc}>", "")
 #        print(f"{filterUser}joined. (JoinEvent)")
-#        await ej.send_privmsg(f"{c2nc}", f"/me Twitch says {filterUser} hi. (JoinEvent)")
+#        await ej.send_privmsg(f"{c2nc}", f"/me Twitch says {filterUser} hi. selphyHi (JoinEvent)")
 #    else:
 #        print(f"event_join couldn't find channel")
 #    
@@ -95,8 +97,8 @@ async def event_message(ctx):
     # make sure the bot ignores itself and the streamer
     if ctx.author.name.lower() == os.environ['TWITCH_BOT_NICK'].lower():
         return
-    #elif ctx.author.name.lower() == 'zeldafanchris'.lower():
-        #return
+    elif ctx.author.name.lower() == 'zfcbot'.lower() or ctx.author.name.lower() == 'calitobot'.lower():
+        return
     await bot.handle_commands(ctx)
     #await ctx.channel.send(ctx.content) #| annoying repeating messages
     if any(word in greet for word in greetList):
@@ -107,14 +109,44 @@ async def event_message(ctx):
         await ctx.channel.send(f"/me {random.choice(husoAnswer)} @{ctx.author.name}")
     elif any(word in ripN for word in ripList):
         await ctx.channel.send(f"/me {random.choice(ripAnswer)} selphySad @{ctx.author.name}")
+    elif 'selphytootl2' in ctx.content.lower():
+        await ctx.channel.send("selphyTootl2")
         
 @bot.event
 async def event_command_error(ctx, error):
-    await ctx.channel.send(f'/me Error running command: {error} @{ctx.message.author.name}')
+    error = str(error)
+    if "was not found" not in error:
+        errormessage = f"/me @{ctx.author.name}" + " Error: " + error
+        await ctx.channel.send(errormessage)
+    with open("commanderr.log", "a+") as errorfile:
+        error = error + "\n"
+        errorfile.write(error)
+
+@bot.command(name='checkerrors')
+async def checkerrors(ctx):
+    if str(ctx.author.is_mod)=="True":
+        if 'last' in ctx.content:
+            with open("commanderr.log", "r") as f:
+                for last_line in f:
+                    fS = "/me Last error: " + last_line
+                await ctx.channel.send(fS)
+        elif 'last' not in ctx.content:
+            with open("commanderr.log", "r") as f:
+                errorcount = 0
+                wnf = 0
+                for line in f:
+                    errorcount = errorcount + 1
+                    if "was not found" in line:
+                        wnf = wnf + 1
+                errorcount = errorcount-1
+                errormessage = "/me " + str(errorcount) + " errors have been logged. " + str(wnf) + " were CommandNotFound errors"
+                await ctx.channel.send(errormessage)
+    else:
+        await ctx.channel.send("/me Netter Versuch, der Command ist nur für Mods :)")
 
 @bot.command(name='test')
 async def test(ctx):
-    testOP = "user: " + str(ctx.author.name) + " with the id: " + str(ctx.author.id) + " ran test"
+    testOP = "/me user: " + str(ctx.author.name) + " with the id: " + str(ctx.author.id) + " ran test"
     print(testOP)
     await ctx.channel.send(testOP)
 
@@ -152,26 +184,101 @@ async def calc(ctx):
 
 @bot.command(name='marry')
 async def marry(ctx):
-    mchoices = ['yes'] * 1 + ['no'] * 99
-    myes = random.choice(mchoices)
+    if (ctx.channel.name)==CHANNEL1:
+        mchoices = ['yes'] * 1 + ['no'] * 99
+        persuade = ['selphyNuu', 'selphyGasm', 'selphyAra', 'selphySad', 'vertik1Geist', 'selphyPat', 'selphySweat']
+        persuadePercentage = 4
+        persuadeBitPercentage = 99
+        persuadeBit = ['cheer1000', 'cheer5000', 'cheer50000']
+        if any(word in ctx.content.split(' ') for word in persuade):
+            x = 0
+            while x < persuadePercentage:
+                mchoices.remove('no')
+                x = x+1
+            while x > 0:
+                mchoices.append('yes')
+                x = x-1
+        elif any(word in ctx.content.split(' ') for word in persuadeBit):
+            x = 0
+            while x < persuadeBitPercentage:
+                mchoices.remove('no')
+                x = x+1
+            while x > 0:
+                mchoices.append('yes')
+                x = x-1
+        yes, no = 0, 0
+        for p in mchoices:
+            if p=='yes':
+                yes = yes+1
+            elif p=='no':
+                no = no+1
+        myes = random.choice(mchoices)
+        print(f"{ctx.author.name} used !marry in channel {CHANNEL1} and had a", yes, "% Chance to win, ", no, f"% to lose. Result: {myes}")
+        with open("marry", "r") as marryF:
+            for mcontent in marryF:
+                if mcontent==f"{ctx.author.name}":
+                    await ctx.channel.send(f"/me @{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
+                elif myes=='yes':
+                    with open("marry", "w+") as marryF:
+                        marryF.write(f"{ctx.author.name}")
+                        await ctx.channel.send(f"/me YES I WILL selphyPog @{ctx.author.name}")
+                elif myes=='no':
+                    with open("marry", "r") as marryF:
+                        for mcontent in marryF:
+                            mpass = [f"/me No, never selphyPout @{ctx.author.name}", f"/me Not even in your dreams selphyRage @{ctx.author.name}", f"/me Not like this selphyPout @{ctx.author.name}", f"/me Get a little more creative selphyIQ @{ctx.author.name}"]
+                            manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
+                            await ctx.channel.send(manswer)
+    else:
+        mchoices = ['yes'] * 1 + ['no'] * 99
+        persuade = ['selphyNuu', 'selphyGasm', 'selphyAra', 'selphySad', 'vertik1Geist', 'selphyPat', 'selphySweat']
+        persuadePercentage = 4
+        persuadeBitPercentage = 99
+        persuadeBit = ['cheer1000', 'cheer5000', 'cheer50000']
+        if any(word in ctx.content.split(' ') for word in persuade):
+            x = 0
+            while x < persuadePercentage:
+                mchoices.remove('no')
+                x = x+1
+            while x > 0:
+                mchoices.append('yes')
+                x = x-1
+        yes, no = 0, 0
+        for p in mchoices:
+            if p=='yes':
+                yes = yes+1
+            elif p=='no':
+                no = no+1
+        myes = random.choice(mchoices)
+        print(f"{ctx.author.name} used !marry in channel {CHANNEL2} and had a", yes, "% Chance to win, ", no, f"% to lose. Result: {myes}")
+        with open("marry", "r") as marryF:
+            for mcontent in marryF:
+                if mcontent==f"{ctx.author.name}":
+                    await ctx.channel.send(f"/me @{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
+                elif myes=='yes':
+                    with open("marry", "w+") as marryF:
+                        marryF.write(f"{ctx.author.name}")
+                        await ctx.channel.send(f"/me YES I WILL selphyPog @{ctx.author.name}")
+                elif myes=='no':
+                    with open("marry", "r") as marryF:
+                        for mcontent in marryF:
+                            mpass = [f"/me No, never selphyPout @{ctx.author.name}", f"/me Not even in your dreams selphyRage @{ctx.author.name}", f"/me Not like this selphyPout @{ctx.author.name}", f"/me Get a little more creative selphyIQ @{ctx.author.name}"]
+                            manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
+                            await ctx.channel.send(manswer)
+
+@bot.command(name='divorce')
+async def divorce(ctx):
     with open("marry", "r") as marryF:
         for mcontent in marryF:
             if mcontent==f"{ctx.author.name}":
-                await ctx.channel.send(f"/me @{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
-            elif myes=='yes':
                 with open("marry", "w+") as marryF:
-                    marryF.write(f"{ctx.author.name}")
-                    await ctx.channel.send(f"/me YES I WILL selphyPog @{ctx.author.name}")
-            elif myes=='no':
-                with open("marry", "r") as marryF:
-                    for mcontent in marryF:
-                        mpass = [f"/me No, never selphyPout @{ctx.author.name}", f"/me Not even in your dreams selphyRage @{ctx.author.name}", f"/me Not like this selphyPout @{ctx.author.name}", f"/me Get a little more creative selphyIQ @{ctx.author.name}"]
-                        manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
-                        await ctx.channel.send(manswer)
+                    marryF.write(f"noone")
+                    await ctx.channel.send(f"/me WHAT? YOU CANT JUST UN-MARRY ME selphyNANI ({os.environ['TWITCH_BOT_NICK']} is now married to noone)")
+            elif mcontent!=f"{ctx.author.name}":
+                await ctx.channel.send(f"/me We are not even married @{ctx.author.name} selphyPout")
 
 @bot.command(name='operators')
 async def operators(ctx):
-    await ctx.channel.send("Possible Operators: '+' '-' ':' '*'")
+    await ctx.channel.send("/me Possible Operators: '+' '-' ':' '*'")
 
 @bot.command(name='clip')
 async def clip(ctx):
@@ -238,20 +345,20 @@ async def lotto(ctx, *l):
                         lottoN = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21')
                         lottoR = random.choice(lottoN)
                         lottoGAnzahl = (len(lottoG))
-                        if lottoGAnzahl== 1 and lottoR in lottoG:
-                            await ctx.channel.send(f"/me @{ctx.author.name} won the jackpot. ({jackpotL}) selphyPog")
-                            with open((lottoUser), "w+") as lottoUserF:
-                                lottoUserFC = lottoUserFC+jackpotL
-                                lottoUserFC = str(lottoUserFC)
-                                lottoUserF.write(lottoUserFC)
-                            with open("jackpot", "w+") as jackpotF3:
-                                jackpotWrite = 0
-                                jackpotF3.write(str(jackpotWrite))
-                                lottoStatus = 'jackpot'
-                        elif lottoUserFC>=priceLoss: 
+                        if lottoUserFC>=priceLoss: 
                             lottoNS = "/me Lotto Number: " + lottoR
                             await ctx.channel.send(lottoNS)
-                            if lottoR in lottoG:
+                            if lottoGAnzahl== 1 and lottoR in lottoG:
+                                await ctx.channel.send(f"/me @{ctx.author.name} won the jackpot. ({jackpotL}) selphyPog")
+                                with open((lottoUser), "w+") as lottoUserF:
+                                    lottoUserFC = lottoUserFC+jackpotL
+                                    lottoUserFC = str(lottoUserFC)
+                                    lottoUserF.write(lottoUserFC)
+                                with open("jackpot", "w+") as jackpotF3:
+                                    jackpotWrite = 0
+                                    jackpotF3.write(str(jackpotWrite))
+                                    lottoStatus = 'jackpot'
+                            elif lottoGAnzahl != 1 and lottoR in lottoG:
                                 lottoStatus = 'won'
                                 lottoUserFC = lottoUserFC+price
                                 lottoUserF.close()
@@ -368,12 +475,23 @@ async def dice(ctx, sides):
     if RepresentsInt(sides):
         sides = int(sides)
         if sides<1:
-            await ctx.send('invalid number of sides')
+            await ctx.send(f'/me @{ctx.author.name} invalid number of sides')
         else:
-            dice = [str(random.choice(range(1, sides + 1)))]
-            await ctx.channel.send(random.choice(dice))
+            dice = str(random.choice(range(1, sides + 1)))
+            if sides>1 and int(dice) == int(sides):
+                reward = 50 * int(sides) # amount of credits earned per side
+                with open((ctx.author.name), "r") as howmuchfile:
+                    userCurrency = howmuchfile.readline()
+                    userCurrency = int(userCurrency) + reward
+                with open((ctx.author.name), "w+") as howmuchfile:
+                    howmuchfile.write(str(userCurrency))
+                diceMessage = f"/me @{ctx.author.name} " + str(dice) + f" is the same number as the number of sides, congrats take these {reward} credits. selphyPray"
+                await ctx.channel.send(diceMessage)
+            elif dice != sides:
+                diceMessage = f"/me @{ctx.author.name} Your number is: " + dice
+                await ctx.channel.send(diceMessage)
     else:
-        await ctx.send("invalid input")
+        await ctx.channel.send("invalid input")
 
 @bot.command(name='get')
 async def get(ctx):
@@ -506,6 +624,31 @@ async def flip(ctx):
         f.write(str(punkte))
         f.close()
 
+@bot.command(name='luv')
+async def luv(ctx, *luvtarget):
+    luvChoice = random.choice(range(1, 101))
+    luvtarget = str(luvtarget)
+    luvtarget = luvtarget.replace("(", "")
+    luvtarget = luvtarget.replace(")", "")
+    luvtarget = luvtarget.replace("'", "")
+    luvtarget = luvtarget.replace(",", "")
+    if luvChoice<=1:
+        await ctx.timeout((ctx.author.name), 60, "doesn't have enough luv in their live")
+    elif luvChoice<15 and luvChoice>0:
+        selphyEmote='selphyCringe'
+    elif luvChoice<36 and luvChoice>14:
+        selphyEmote='selphyNuu'
+    elif luvChoice>35 and luvChoice<65:
+        selphyEmote='selphyWTF'
+    elif luvChoice>64 and luvChoice<85:
+        selphyEmote='selphyTootl2'
+    elif luvChoice>84 and luvChoice<100:
+        selphyEmote='selphyPray'
+    elif luvChoice==100:
+        selphyEmote='selphyNANI'
+    luvMessage = f"/me @{ctx.author.name} and {luvtarget} have a {luvChoice}% chance to fall in luv {selphyEmote}"
+    await ctx.channel.send(luvMessage)
+
 @bot.command(name='credits')
 async def credits(ctx):
     creditsCommand = (f"{ctx.author.name}")
@@ -541,6 +684,7 @@ async def credits(ctx):
 async def gift(ctx):
     giftUser1 = (f"{ctx.author.name}")
     useless, giftR, giftAmount = ctx.content.split(' ')
+    giftR = giftR.lower()
     try:
         giftFile = open((giftUser1), "r")
     except FileNotFoundError:
@@ -625,6 +769,10 @@ async def gift(ctx):
             elif VEerror==False:
                 await ctx.channel.send(f"/me @{ctx.author.name} thats not a number! selphyPout")
 
+@bot.command(name='asynctest')
+async def asynccommand(ctx):
+    await ctx.channel.send("alles husos")
+
 @bot.command(name='commands')
 async def commands(ctx):
     cS = "/me Commands: "
@@ -644,4 +792,3 @@ async def commands(ctx):
 
 if __name__ == "__main__":
     bot.run()
-
