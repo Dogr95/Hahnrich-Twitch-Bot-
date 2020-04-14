@@ -40,6 +40,16 @@ async def calitoisttoll(ctx):
         chanceV = str(chanceV)
         await ctx.channel.send(chanceV)
 
+@bot.command(name='spin')
+async def spin(ctx):
+    if str(ctx.author.name) != "zfcbot":
+        await ctx.channel.send(ctx.content)
+    
+@bot.command(name='slot')
+async def slot(ctx):
+    if str(ctx.author.name) != "zfcbot":
+        await ctx.channel.send(ctx.content)
+
 @bot.command(name='c')
 async def c(ctx):
     if str(ctx.author.name) == 'vertikarl':
