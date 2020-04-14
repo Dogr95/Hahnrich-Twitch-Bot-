@@ -343,7 +343,7 @@ async def event(ctx, eventstatus):
             eventFile.close()
             eventCFile = open("Event", "w+")
             eventCFile.write(eventstatus)
-            eventSs = "Event is now " + eventstatus + ". You can now enter !get to recieve 100 credits each time."
+            eventSs = "Event is now " + eventstatus + ". You can now enter !get to receive 100 credits each time."
             await ctx.send(eventSs)
             actEv = "Event is: " + eventstatus
             activity = discord.Game(actEv)

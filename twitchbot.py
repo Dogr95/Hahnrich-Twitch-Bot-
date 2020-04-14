@@ -536,7 +536,7 @@ async def event(ctx, user):
             eventFile.close()
             eventCFile = open("Event", "w+")
             eventCFile.write(eventstatus)
-            eventSs = "/me Event is now " + eventstatus + ". You can now enter !get to recieve 100 credits each time."
+            eventSs = "/me Event is now " + eventstatus + ". You can now enter !get to receive 100 credits each time."
             await ctx.channel.send(eventSs)
         elif eventstatus=='close' and eventSF=='close':
             await ctx.channel.send("/me Event is already closed")
