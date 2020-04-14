@@ -42,12 +42,12 @@ async def calitoisttoll(ctx):
 
 @bot.command(name='spin')
 async def spin(ctx):
-    if str(ctx.author.name) != "zfcbot":
+    if str(ctx.author.name) != "zfcbot" and str(ctx.author.name) != "calitobundo" and str(ctx.author.name) != "calitobot":
         await ctx.channel.send(ctx.content)
     
 @bot.command(name='slot')
 async def slot(ctx):
-    if str(ctx.author.name) != "zfcbot":
+    if str(ctx.author.name) != "zfcbot" and str(ctx.author.name) != "calitobundo" and str(ctx.author.name) != "calitobot":
         await ctx.channel.send(ctx.content)
 
 @bot.command(name='c')
