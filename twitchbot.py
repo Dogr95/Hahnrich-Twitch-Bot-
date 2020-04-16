@@ -1,14 +1,14 @@
-import os # for importing env vars for the bot to use
+import os  # for importing env vars for the bot to use
 import random
 from twitchio.ext import commands
 from dotenv import load_dotenv
 import asyncio
-import datetime as DT
 import json
+import satzgenerator
 
 load_dotenv()
 CHANNEL1, CHANNEL2 = [os.environ['TWITCH_CHANNEL']] + [os.environ['TWITCH_CHANNEL2']]
-#channels = str(channels)
+# channels = str(channels)
 channels = CHANNEL1 + ", " + CHANNEL2
 print("running on:", channels)
 
@@ -21,24 +21,34 @@ bot = commands.Bot(
     initial_channels=[f"{CHANNEL1}", f"{CHANNEL2}"]
 )
 
-channelid=[os.environ['TWITCH_CHANNELID']]
-ttsCost=500
+channelid = [os.environ['TWITCH_CHANNELID']]
+ttsCost = 500
 
-greetAnswer = ['Hi! selphyHi', 'Auch hier? selphyHi', 'Lang nicht gesehen selphyHi', 'Hey, was geht? selphyHi', 'Tag, haben wir uns schonmal gesehen? selphyHi']
-greetList = ['vertik1sachse', 'vertik1geist', 'vertik1flex', 'snaqblank', 'joelucutz', 'joelucutz,', 'hello', 'hello,', 'hi', 'hi,', 'tag', 'tag,', 'hallo', 'hallo,', 'selphyhi', 'selphyhi,', 'moin', 'moin,', 'servus', 'servus,', 'grüße', 'grüße,', 'hey', 'hey,', 'sup', 'sup,', 'hay', 'hay,' 'hoi', 'hoi,']
+greetAnswer = ['Hi! selphyHi', 'Auch hier? selphyHi', 'Lang nicht gesehen selphyHi', 'Hey, was geht? selphyHi',
+               'Tag, haben wir uns schonmal gesehen? selphyHi']
+greetList = ['vertik1sachse', 'vertik1geist', 'vertik1flex', 'snaqblank', 'joelucutz', 'joelucutz,', 'hello', 'hello,',
+             'hi', 'hi,', 'tag', 'tag,', 'hallo', 'hallo,', 'selphyhi', 'selphyhi,', 'moin', 'moin,', 'servus',
+             'servus,', 'grüße', 'grüße,', 'hey', 'hey,', 'sup', 'sup,', 'hay', 'hay,' 'hoi', 'hoi,']
 greetWList = ['wie gehts', 'was geht', 'und dir?', 'deine lage?', 'bei dir?']
-greetWAnswer = ['Ganz okay... hoffentlich bald Feierabend selphySweat', 'Mir gehts ganz gut und selber? selphySmug', 'Das geht dich nichts an! selphyPout', 'Meine Lage ist unbestimmt seit der Zeit in Vietnam selphySad', 'Sag du es mir selphyIQ', 'Die Frage ist, wie gehts DIR? selphyAra', 'Lass dir mal ne andere Frage einfallen selphyRage']
-husoList = ['huso', 'haʟʟo', 'haʟʟo,', 'haiio', 'hailo', 'hailo,', 'halio', 'halio,', 'haiio,', 'halo', 'halo,', 'was los klaus', 'alles husos', 'husos', 'erschieß dich', 'erschiess dich', 'account vor drei minuten erstellt', 'xhuso']
+greetWAnswer = ['Ganz okay... hoffentlich bald Feierabend selphySweat', 'Mir gehts ganz gut und selber? selphySmug',
+                'Das geht dich nichts an! selphyPout', 'Meine Lage ist unbestimmt seit der Zeit in Vietnam selphySad',
+                'Sag du es mir selphyIQ', 'Die Frage ist, wie gehts DIR? selphyAra',
+                'Lass dir mal ne andere Frage einfallen selphyRage']
+husoList = ['huso', 'haʟʟo', 'haʟʟo,', 'haiio', 'hailo', 'hailo,', 'halio', 'halio,', 'haiio,', 'halo', 'halo,',
+            'was los klaus', 'alles husos', 'husos', 'erschieß dich', 'erschiess dich',
+            'account vor drei minuten erstellt', 'xhuso']
 husoAnswer = ['Alles Husos, was los Klaus.', 'Account vor drei Minuten erstellt, ahja', 'ahja', 'xhuso']
 ripList = ['rip', 'rip,', 'f', 'f,', 'selphysad', 'noo', 'nooo', 'noooo']
 ripAnswer = ['F', 'NOOO', 'WHY', 'warum tust du das?', 'alles husos', 'beim nächsten mal läufts bestimmt besser']
 
+
 def RepresentsInt(ReprInt):
-    try: 
+    try:
         int(ReprInt)
         return True
     except ValueError:
         return False
+
 
 @bot.event
 async def event_ready():
@@ -48,8 +58,9 @@ async def event_ready():
     await ws.send_privmsg(f"{CHANNEL1}", f"/me is watching!")
     await ws.send_privmsg(f"{CHANNEL2}", f"/me is watching!")
 
-#@bot.event
-#async def event_join(user):
+
+# @bot.event
+# async def event_join(user):
 #    ej = bot._ws
 #    filterUser = str(f"{user}")
 #    filterUser = filterUser.replace("<User name=", "")
@@ -66,8 +77,8 @@ async def event_ready():
 #    else:
 #        print(f"event_join couldn't find channel")
 #    
-#@bot.event
-#async def event_part(user):
+# @bot.event
+# async def event_part(user):
 #    ep = bot._ws
 #    filterUserP = str(f"{user}")
 #    filterUserP = filterUserP.replace("<User name=", "")
@@ -87,21 +98,21 @@ async def event_ready():
 @bot.event
 async def event_message(ctx):
     'Runs every time a message is sent in chat.'
-    #shortened channelsend
+    # shortened channelsend
     greet = ctx.content.lower()
     stateM = ctx.content.lower()
     husoN = ctx.content.lower()
     ripN = ctx.content.lower()
     ripN = greet.split(' ')
     greet = greet.split(' ')
-    
+
     # make sure the bot ignores itself and the streamer
     if ctx.author.name.lower() == os.environ['TWITCH_BOT_NICK'].lower():
         return
     elif ctx.author.name.lower() == 'zfcbot'.lower() or ctx.author.name.lower() == 'calitobot'.lower():
         return
     await bot.handle_commands(ctx)
-    #await ctx.channel.send(ctx.content) #| annoying repeating messages
+    # await ctx.channel.send(ctx.content) #| annoying repeating messages
     if any(word in greet for word in greetList):
         await ctx.channel.send(f"/me {random.choice(greetAnswer)} @{ctx.author.name}!")
     elif any(word in stateM for word in greetWList):
@@ -112,7 +123,8 @@ async def event_message(ctx):
         await ctx.channel.send(f"/me {random.choice(ripAnswer)} selphySad @{ctx.author.name}")
     elif 'selphytootl2' in ctx.content.lower():
         await ctx.channel.send("selphyTootl2")
-        
+
+
 @bot.event
 async def event_command_error(ctx, error):
     error = str(error)
@@ -123,9 +135,10 @@ async def event_command_error(ctx, error):
         error = error + "\n"
         errorfile.write(error)
 
+
 @bot.command(name='checkerrors')
 async def checkerrors(ctx):
-    if str(ctx.author.is_mod)=="True":
+    if str(ctx.author.is_mod) == "True":
         if 'last' in ctx.content:
             with open("commanderr.log", "r") as f:
                 for last_line in f:
@@ -139,32 +152,36 @@ async def checkerrors(ctx):
                     errorcount = errorcount + 1
                     if "was not found" in line:
                         wnf = wnf + 1
-                errorcount = errorcount-1
-                errormessage = "/me " + str(errorcount) + " errors have been logged. " + str(wnf) + " were CommandNotFound errors"
+                errorcount = errorcount - 1
+                errormessage = "/me " + str(errorcount) + " errors have been logged. " + str(
+                    wnf) + " were CommandNotFound errors"
                 await ctx.channel.send(errormessage)
     else:
         await ctx.channel.send("/me Netter Versuch, der Command ist nur für Mods :)")
+
 
 @bot.command(name='ranking')
 async def ranking(ctx):
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     ranking = []
     for item in entry:
         ranking.append({"name": item['name'], "balance": item['balance']})
-    
+
     ranking = sorted(ranking, key=lambda k: k['balance'], reverse=True)
     ranking = ranking[:10]
     message = f"/me Top {len(ranking)}: " + ', '.join(d['name'] + " " + str(d['balance']) + " credits" for d in ranking)
     await ctx.channel.send(message)
+
 
 @bot.command(name='test')
 async def test(ctx):
     testOP = "/me user: " + str(ctx.author.name) + " with the id: " + str(ctx.author.id) + " ran test"
     print(testOP)
     await ctx.channel.send(testOP)
+
 
 @bot.command(name='calc')
 async def calc(ctx):
@@ -199,117 +216,128 @@ async def calc(ctx):
         else:
             await ctx.channel.send(f"/me Invalid syntax @{ctx.author.name}")
 
+
 @bot.command(name='marry')
 async def marry(ctx, potential_spouse):
-    if potential_spouse.lower()==os.environ['TWITCH_BOT_NICK'].lower():
-            if (ctx.channel.name)==CHANNEL1:
-                mchoices = ['yes'] * 1 + ['no'] * 99
-                persuade = ['selphyNuu', 'selphyGasm', 'selphyAra', 'selphySad', 'vertik1Geist', 'selphyPat', 'selphySweat']
-                persuadePercentage = 4
-                persuadeBitPercentage = 99
-                persuadeBit = ['cheer1000', 'cheer5000', 'cheer50000']
-                if any(word in ctx.content.split(' ') for word in persuade):
-                    x = 0
-                    while x < persuadePercentage:
-                        mchoices.remove('no')
-                        x = x+1
-                    while x > 0:
-                        mchoices.append('yes')
-                        x = x-1
-                elif any(word in ctx.content.split(' ') for word in persuadeBit):
-                    x = 0
-                    while x < persuadeBitPercentage:
-                        mchoices.remove('no')
-                        x = x+1
-                    while x > 0:
-                        mchoices.append('yes')
-                        x = x-1
-                yes, no = 0, 0
-                for p in mchoices:
-                    if p=='yes':
-                        yes = yes+1
-                    elif p=='no':
-                        no = no+1
-                myes = random.choice(mchoices)
-                print(f"{ctx.author.name} used !marry in channel {CHANNEL1} and had a", yes, "% Chance to win, ", no, f"% to lose. Result: {myes}")
-                with open("marry", "r") as marryF:
-                    for mcontent in marryF:
-                        if mcontent==f"{ctx.author.name}":
-                            await ctx.channel.send(f"/me @{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
-                        elif myes=='yes':
-                            with open("marry", "w+") as marryF:
-                                marryF.write(f"{ctx.author.name}")
-                                await ctx.channel.send(f"/me YES I WILL selphyPog @{ctx.author.name}")
-                        elif myes=='no':
-                            with open("marry", "r") as marryF:
-                                for mcontent in marryF:
-                                    mpass = [f"/me No, never selphyPout @{ctx.author.name}", f"/me Not even in your dreams selphyRage @{ctx.author.name}", f"/me Not like this selphyPout @{ctx.author.name}", f"/me Get a little more creative selphyIQ @{ctx.author.name}"]
-                                    manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
-                                    await ctx.channel.send(manswer)
-            else:
-                mchoices = ['yes'] * 1 + ['no'] * 99
-                persuade = ['selphyNuu', 'selphyGasm', 'selphyAra', 'selphySad', 'vertik1Geist', 'selphyPat', 'selphySweat']
-                persuadePercentage = 4
-                persuadeBitPercentage = 99
-                persuadeBit = ['cheer1000', 'cheer5000', 'cheer50000']
-                if any(word in ctx.content.split(' ') for word in persuade):
-                    x = 0
-                    while x < persuadePercentage:
-                        mchoices.remove('no')
-                        x = x+1
-                    while x > 0:
-                        mchoices.append('yes')
-                        x = x-1
-                yes, no = 0, 0
-                for p in mchoices:
-                    if p=='yes':
-                        yes = yes+1
-                    elif p=='no':
-                        no = no+1
-                myes = random.choice(mchoices)
-                print(f"{ctx.author.name} used !marry in channel {CHANNEL2} and had a", yes, "% Chance to win, ", no, f"% to lose. Result: {myes}")
-                with open("marry", "r") as marryF:
-                    for mcontent in marryF:
-                        if mcontent==f"{ctx.author.name}":
-                            await ctx.channel.send(f"/me @{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
-                        elif myes=='yes':
-                            with open("marry", "w+") as marryF:
-                                marryF.write(f"{ctx.author.name}")
-                                await ctx.channel.send(f"/me YES I WILL selphyPog @{ctx.author.name}")
-                        elif myes=='no':
-                            with open("marry", "r") as marryF:
-                                for mcontent in marryF:
-                                    mpass = [f"/me No, never selphyPout @{ctx.author.name}", f"/me Not even in your dreams selphyRage @{ctx.author.name}", f"/me Not like this selphyPout @{ctx.author.name}", f"/me Get a little more creative selphyIQ @{ctx.author.name}"]
-                                    manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
-                                    await ctx.channel.send(manswer)
+    if potential_spouse.lower() == os.environ['TWITCH_BOT_NICK'].lower():
+        if ctx.channel.name == CHANNEL1:
+            mchoices = ['yes'] * 1 + ['no'] * 99
+            persuade = ['selphyNuu', 'selphyGasm', 'selphyAra', 'selphySad', 'vertik1Geist', 'selphyPat', 'selphySweat']
+            persuadePercentage = 4
+            persuadeBitPercentage = 99
+            persuadeBit = ['cheer1000', 'cheer5000', 'cheer50000']
+            if any(word in ctx.content.split(' ') for word in persuade):
+                x = 0
+                while x < persuadePercentage:
+                    mchoices.remove('no')
+                    x = x + 1
+                while x > 0:
+                    mchoices.append('yes')
+                    x = x - 1
+            elif any(word in ctx.content.split(' ') for word in persuadeBit):
+                x = 0
+                while x < persuadeBitPercentage:
+                    mchoices.remove('no')
+                    x = x + 1
+                while x > 0:
+                    mchoices.append('yes')
+                    x = x - 1
+            yes, no = 0, 0
+            for p in mchoices:
+                if p == 'yes':
+                    yes = yes + 1
+                elif p == 'no':
+                    no = no + 1
+            myes = random.choice(mchoices)
+            print(f"{ctx.author.name} used !marry in channel {CHANNEL1} and had a", yes, "% Chance to win, ", no,
+                  f"% to lose. Result: {myes}")
+            with open("marry", "r") as marryF:
+                for mcontent in marryF:
+                    if mcontent == f"{ctx.author.name}":
+                        await ctx.channel.send(
+                            f"/me @{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
+                    elif myes == 'yes':
+                        with open("marry", "w+") as marryF:
+                            marryF.write(f"{ctx.author.name}")
+                            await ctx.channel.send(f"/me YES I WILL selphyPog @{ctx.author.name}")
+                    elif myes == 'no':
+                        with open("marry", "r") as marryF:
+                            for mcontent in marryF:
+                                mpass = [f"/me No, never selphyPout @{ctx.author.name}",
+                                         f"/me Not even in your dreams selphyRage @{ctx.author.name}",
+                                         f"/me Not like this selphyPout @{ctx.author.name}",
+                                         f"/me Get a little more creative selphyIQ @{ctx.author.name}"]
+                                manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
+                                await ctx.channel.send(manswer)
+        else:
+            mchoices = ['yes'] * 1 + ['no'] * 99
+            persuade = ['selphyNuu', 'selphyGasm', 'selphyAra', 'selphySad', 'vertik1Geist', 'selphyPat', 'selphySweat']
+            persuadePercentage = 4
+            persuadeBitPercentage = 99
+            persuadeBit = ['cheer1000', 'cheer5000', 'cheer50000']
+            if any(word in ctx.content.split(' ') for word in persuade):
+                x = 0
+                while x < persuadePercentage:
+                    mchoices.remove('no')
+                    x = x + 1
+                while x > 0:
+                    mchoices.append('yes')
+                    x = x - 1
+            yes, no = 0, 0
+            for p in mchoices:
+                if p == 'yes':
+                    yes = yes + 1
+                elif p == 'no':
+                    no = no + 1
+            myes = random.choice(mchoices)
+            print(f"{ctx.author.name} used !marry in channel {CHANNEL2} and had a", yes, "% Chance to win, ", no,
+                  f"% to lose. Result: {myes}")
+            with open("marry", "r") as marryF:
+                for mcontent in marryF:
+                    if mcontent == f"{ctx.author.name}":
+                        await ctx.channel.send(
+                            f"/me @{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
+                    elif myes == 'yes':
+                        with open("marry", "w+") as marryF:
+                            marryF.write(f"{ctx.author.name}")
+                            await ctx.channel.send(f"/me YES I WILL selphyPog @{ctx.author.name}")
+                    elif myes == 'no':
+                        with open("marry", "r") as marryF:
+                            for mcontent in marryF:
+                                mpass = [f"/me No, never selphyPout @{ctx.author.name}",
+                                         f"/me Not even in your dreams selphyRage @{ctx.author.name}",
+                                         f"/me Not like this selphyPout @{ctx.author.name}",
+                                         f"/me Get a little more creative selphyIQ @{ctx.author.name}"]
+                                manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
+                                await ctx.channel.send(manswer)
     else:
-        balance = 5000 #Default balance for newly added users
-        found_user = False #Default
+        balance = 5000  # Default balance for newly added users
+        found_user = False  # Default
         potential_spouse = potential_spouse.lower()
         with open("ser.json", "r") as f:
             ser = json.load(f)
             entry = ser['user']
-        
+
         partner = None
         user = {'name': ctx.author.name.lower(),
-            'id': ctx.author.id,
-            'balance': balance,
-            'partner': partner
-            }
-    
+                'id': ctx.author.id,
+                'balance': balance,
+                'partner': partner
+                }
+
         with open("ser.json", "r") as f:
             ser = json.load(f)
             entry = ser['user']
-        
+
         for item in entry:
             if item['name'] == potential_spouse:
                 potential_spouse = item
-                found_user=True
-        
-        if found_user==False:
+                found_user = True
+
+        if found_user == False:
             await ctx.channel.send(f"/me Potential Spouse not found @{ctx.author.name}")
-    
-        elif found_user==True:
+
+        elif found_user == True:
             for item in entry:
                 if item['id'] == user['id']:
                     if potential_spouse['name'] in item['name']:
@@ -321,7 +349,7 @@ async def marry(ctx, potential_spouse):
                         User = item['name']
                         ID = item['id']
                         Balance = item['balance']
-                        #change name if user changed name
+                        # change name if user changed name
                         if user['name'] != User:
                             User = user['name']
                         item['name'] = str(User)
@@ -330,69 +358,71 @@ async def marry(ctx, potential_spouse):
                         item['partner'] = Partner
                         await ctx.channel.send(f"/me @{ctx.author.name} sent a proposal to {potential_spouse['name']}")
                         with open("ser.json", "w") as f:
-                                    o = json.dumps(ser, indent=2)
-                                    f.write(o)
+                            o = json.dumps(ser, indent=2)
+                            f.write(o)
                         break
             else:
                 item = None
                 with open("ser.json", "w") as f:
-                        entry.append(user)    
-                        o = json.dumps(ser, indent=2)
-                        f.write(o)
+                    entry.append(user)
+                    o = json.dumps(ser, indent=2)
+                    f.write(o)
                 await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
+
 
 @bot.command(name='accept')
 async def accept(ctx, proposal):
-    balance = 5000 #Default balance for newly added users
+    balance = 5000  # Default balance for newly added users
     proposal = proposal.lower()
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
 
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance
-        }
+            'id': ctx.author.id,
+            'balance': balance
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-        
+
     for item in entry:
         if item['name'] == proposal:
             spouse = item
-    
+
     for item in entry:
         if item['id'] == user['id']:
-            if proposal==item['proposal']:
-               spouse['proposal'] = None
-               spouse['partner'] = ctx.author.name
-               item['proposal'] = None
-               item['partner'] = proposal
-               await ctx.channel.send(f"/me @{ctx.author.name} is now married to {proposal}")
-               with open("ser.json", "w") as f:
+            if proposal == item['proposal']:
+                spouse['proposal'] = None
+                spouse['partner'] = ctx.author.name
+                item['proposal'] = None
+                item['partner'] = proposal
+                await ctx.channel.send(f"/me @{ctx.author.name} is now married to {proposal}")
+                with open("ser.json", "w") as f:
                     o = json.dumps(ser, indent=2)
                     f.write(o)
-               break
+                break
     else:
         await ctx.channel.send(f"/me No proposal from user {proposal} found. @{ctx.author.name}")
 
+
 @bot.command(name='marriage')
 async def marriage(ctx):
-    balance = 5000 #Default balance for newly added users
+    balance = 5000  # Default balance for newly added users
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
 
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance
-        }
+            'id': ctx.author.id,
+            'balance': balance
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     for item in entry:
         if item['id'] == user['id']:
             if item['proposal'] != None:
@@ -406,34 +436,36 @@ async def marriage(ctx):
             await ctx.channel.send(f"/me @{ctx.author.name} is currently {part} and has {prop}!")
             break
 
+
 @bot.command(name='decline')
 async def decline(ctx, proposal):
-    balance = 5000 #Default balance for newly added users
+    balance = 5000  # Default balance for newly added users
     proposal = proposal.lower()
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
 
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance
-        }
+            'id': ctx.author.id,
+            'balance': balance
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     for item in entry:
         if item['id'] == user['id']:
-            if proposal==item['proposal']:
-               item['proposal'] = None
-               await ctx.channel.send(f"/me @{ctx.author.name} declined the proposal from {proposal}")
-               with open("ser.json", "w") as f:
+            if proposal == item['proposal']:
+                item['proposal'] = None
+                await ctx.channel.send(f"/me @{ctx.author.name} declined the proposal from {proposal}")
+                with open("ser.json", "w") as f:
                     o = json.dumps(ser, indent=2)
                     f.write(o)
-               break
+                break
     else:
         await ctx.channel.send(f"/me No proposal from user {proposal} found. @{ctx.author.name}")
+
 
 @bot.command(name='divorce')
 async def divorce(ctx, *yes):
@@ -441,29 +473,30 @@ async def divorce(ctx, *yes):
     if os.environ['TWITCH_BOT_NICK'].lower() in isbot:
         with open("marry", "r") as marryF:
             for mcontent in marryF:
-                if mcontent==f"{ctx.author.name}":
+                if mcontent == f"{ctx.author.name}":
                     with open("marry", "w+") as marryF:
                         marryF.write(f"noone")
-                        await ctx.channel.send(f"/me WHAT? YOU CANT JUST UN-MARRY ME selphyNANI ({os.environ['TWITCH_BOT_NICK']} is now married to noone)")
-                elif mcontent!=f"{ctx.author.name}":
+                        await ctx.channel.send(
+                            f"/me WHAT? YOU CANT JUST UN-MARRY ME selphyNANI ({os.environ['TWITCH_BOT_NICK']} is now married to noone)")
+                elif mcontent != f"{ctx.author.name}":
                     await ctx.channel.send(f"/me We are not even married @{ctx.author.name} selphyPout")
     else:
-        balance = 5000 #Default balance for newly added users
+        balance = 5000  # Default balance for newly added users
         with open("ser.json", "r") as f:
             ser = json.load(f)
             entry = ser['user']
-        
+
         partner = None
         user = {'name': ctx.author.name.lower(),
-            'id': ctx.author.id,
-            'balance': balance,
-            'partner': partner
-            }
-    
+                'id': ctx.author.id,
+                'balance': balance,
+                'partner': partner
+                }
+
         with open("ser.json", "r") as f:
             ser = json.load(f)
             entry = ser['user']
-            
+
         for item in entry:
             if item['id'] == user['id']:
                 Partner = item['partner']
@@ -474,37 +507,40 @@ async def divorce(ctx, *yes):
                 User = item['name']
                 ID = item['id']
                 Balance = item['balance']
-                #change name if user changed name
+                # change name if user changed name
                 if user['name'] != User:
                     User = user['name']
                 item['name'] = str(User)
                 item['id'] = int(ID)
                 item['balance'] = int(Balance)
-                if Partner==None:
+                if Partner == None:
                     candivorce = False
                 else:
                     candivorce = True
-                if candivorce==True:
+                if candivorce == True:
                     await ctx.channel.send(f"/me @{ctx.author.name} got divorced from {Partner}")
                 else:
                     await ctx.channel.send(f"/me @{ctx.author.name} is not married")
                 with open("ser.json", "w") as f:
-                            o = json.dumps(ser, indent=2)
-                            f.write(o)
+                    o = json.dumps(ser, indent=2)
+                    f.write(o)
                 break
+
 
 @bot.command(name='operators')
 async def operators(ctx):
     await ctx.channel.send("/me Possible Operators: '+' '-' ':' '*'")
 
+
 @bot.command(name='clip')
 async def clip(ctx):
     await bot.create_clip((os.environ['TWITCH_TMI_TOKEN']), (bot.get_channel))
 
+
 @bot.command(name='listusers')
 async def listusers(ctx):
-    #Chatters = await bot.get_chatters((os.environ['CHANNEL']))
-    #print(Chatters)
+    # Chatters = await bot.get_chatters((os.environ['CHANNEL']))
+    # print(Chatters)
     lUc = str(await bot.get_chatters((f"{CHANNEL1}")))
     lUc = lUc.replace("'", "")
     lUc = lUc.replace("(", " ")
@@ -517,6 +553,7 @@ async def listusers(ctx):
     lUc = f"Users in channel {CHANNEL1}: " + lUc
     await ctx.channel.send(lUc)
 
+
 @bot.command(name='pomf')
 async def pomf(ctx):
     liste = random.choice([greetAnswer, greetWAnswer, husoAnswer, ripAnswer])
@@ -524,38 +561,39 @@ async def pomf(ctx):
     listeMessage = "/me " + listeSmol + f" @{ctx.author.name} selphyHae"
     await ctx.channel.send(listeMessage)
 
+
 @bot.command(name='lotto')
 async def lotto(ctx):
-    balance = 5000 #Default balance for newly added users
+    balance = 5000  # Default balance for newly added users
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     partner = None
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance,
-        'partner': partner
-        }
+            'id': ctx.author.id,
+            'balance': balance,
+            'partner': partner
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-        
+
     for item in entry:
         if item['id'] == user['id']:
             user['balance'] = item['balance']
 
     for item in entry:
         if item['id'] == user['id']:
-            if partner=='t':
+            if partner == 't':
                 entry.remove(item)
             else:
                 Partner = item['partner']
                 User = item['name']
                 ID = item['id']
                 Balance = item['balance']
-                #change name if user changed name
+                # change name if user changed name
                 if user['name'] != User:
                     User = user['name']
                 lottoUser = User
@@ -566,26 +604,29 @@ async def lotto(ctx):
                         for jackpotL in jackpotF:
                             jackpotL = int(jackpotL)
                             await ctx.channel.send(f"/me Jackpot is at {jackpotL} credits. @{ctx.author.name}")
-                            lottoStatus='check'
+                            lottoStatus = 'check'
                 elif 'jackpot' not in lottoG:
                     with open("jackpot", "r") as jackpotF:
                         for jackpotL in jackpotF:
                             jackpotL = int(jackpotL)
                             price = 2400
-                            price = price/(len(lottoG))
+                            price = price / (len(lottoG))
                             price = int(price)
-                            priceLoss = len(lottoG)*100
-                            lottoUserFC = lottoUserFC-priceLoss
-                            lottoN = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21')
+                            priceLoss = len(lottoG) * 100
+                            lottoN = (
+                            '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17',
+                            '18', '19', '20', '21')
                             lottoR = random.choice(lottoN)
                             lottoGAnzahl = (len(lottoG))
-                            if lottoUserFC>=priceLoss: 
+                            if lottoUserFC >= priceLoss:
+                                lottoUserFC = lottoUserFC - priceLoss
                                 lottoNS = "/me Lotto Number: " + lottoR
                                 await ctx.channel.send(lottoNS)
-                                if lottoGAnzahl== 1 and lottoR in lottoG:
-                                    await ctx.channel.send(f"/me @{ctx.author.name} won the jackpot. ({jackpotL}) selphyPog")
+                                if lottoGAnzahl == 1 and lottoR in lottoG:
+                                    await ctx.channel.send(
+                                        f"/me @{ctx.author.name} won the jackpot. ({jackpotL}) selphyPog")
                                     with open((lottoUser), "w+") as lottoUserF:
-                                        lottoUserFC = lottoUserFC+jackpotL
+                                        lottoUserFC = lottoUserFC + jackpotL
                                         lottoUserFC = str(lottoUserFC)
                                         lottoUserF.write(lottoUserFC)
                                     with open("jackpot", "w+") as jackpotF3:
@@ -594,12 +635,14 @@ async def lotto(ctx):
                                         lottoStatus = 'jackpot'
                                 elif lottoGAnzahl != 1 and lottoR in lottoG:
                                     lottoStatus = 'won'
-                                    lottoUserFC = lottoUserFC+price
-                                    lottoWS = f"/me {ctx.author.name} won " + str(price) + " credits. Balance: " + str(lottoUserFC)
+                                    lottoUserFC = lottoUserFC + price
+                                    lottoWS = f"/me {ctx.author.name} won " + str(price) + " credits. Balance: " + str(
+                                        lottoUserFC)
                                     await ctx.channel.send(lottoWS)
                                 else:
                                     lottoStatus = 'lost'
-                                    lottoLS = f"/me {ctx.author.name} lost " + str(priceLoss) + " credits. Balance: " + str(lottoUserFC)
+                                    lottoLS = f"/me {ctx.author.name} lost " + str(
+                                        priceLoss) + " credits. Balance: " + str(lottoUserFC)
                                     await ctx.channel.send(lottoLS)
                             else:
                                 lottoStatus = 'error'
@@ -610,31 +653,32 @@ async def lotto(ctx):
                 item['balance'] = int(Balance)
                 item['partner'] = Partner
                 with open("ser.json", "w") as f:
-                            o = json.dumps(ser, indent=2)
-                            f.write(o)
-                if lottoStatus=='lost':
+                    o = json.dumps(ser, indent=2)
+                    f.write(o)
+                if lottoStatus == 'lost':
                     with open("jackpot", "r") as jackpotF:
                         for jackpotL in jackpotF:
                             jackpotL = int(jackpotL)
-                            jackpotL = priceLoss+jackpotL
+                            jackpotL = priceLoss + jackpotL
                             with open("jackpot", "w+") as jackpotF2:
                                 jackpotF2.write(str(jackpotL))
                 break
     else:
         item = None
         with open("ser.json", "w") as f:
-                entry.append(user)    
-                o = json.dumps(ser, indent=2)
-                f.write(o)
+            entry.append(user)
+            o = json.dumps(ser, indent=2)
+            f.write(o)
         await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
+
 
 @bot.command(name='del')
 async def delete(ctx, name):
-    if ctx.author.name==CHANNEL1:
+    if ctx.author.name == CHANNEL1:
         with open("ser.json", "r") as f:
             ser = json.load(f)
             entry = ser['user']
-        
+
         for item in entry:
             if item['name'] == name:
                 entry.remove(item)
@@ -648,88 +692,90 @@ async def delete(ctx, name):
     else:
         await ctx.channel.send("/me Netter Versuch, der Command ist nur für Mods :)")
 
-@bot.command(name='tts')
-async def tts(ctx, *speech):
-    balance = 5000 #Default balance for newly added users
-    with open("ser.json", "r") as f:
-        ser = json.load(f)
-        entry = ser['user']
-    
-    partner = None
-    user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance,
-        'partner': partner
-        }
 
-    with open("ser.json", "r") as f:
-        ser = json.load(f)
-        entry = ser['user']
-        
-    for item in entry:
-        if item['id'] == user['id']:
-            user['balance'] = item['balance']
+# @bot.command(name='tts')
+# async def tts(ctx, *speech):
+#     balance = 5000  # Default balance for newly added users
+#     with open("ser.json", "r") as f:
+#         ser = json.load(f)
+#         entry = ser['user']
+#
+#     partner = None
+#     user = {'name': ctx.author.name.lower(),
+#             'id': ctx.author.id,
+#             'balance': balance,
+#             'partner': partner
+#             }
+#
+#     with open("ser.json", "r") as f:
+#         ser = json.load(f)
+#         entry = ser['user']
+#
+#     for item in entry:
+#         if item['id'] == user['id']:
+#             user['balance'] = item['balance']
+#
+#     for item in entry:
+#         if item['id'] == user['id']:
+#             if partner == 't':
+#                 entry.remove(item)
+#             else:
+#                 Partner = item['partner']
+#                 User = item['name']
+#                 ID = item['id']
+#                 Balance = item['balance']
+#                 # change name if user changed name
+#                 if user['name'] != User:
+#                     User = user['name']
+#                 ttsUserFC = Balance
+#                 if not speech:
+#                     await ctx.channel.send(f"/me Atleast one word to read required! @{ctx.author.name}")
+#                 else:
+#                     if ttsUserFC >= ttsCost:
+#                         ttsUserFC -= ttsCost
+#                         speech = '_'.join(speech)
+#                         speech = speech.replace("'", "")
+#                         speech = speech.replace('"', '')
+#                         speech = speech.replace("(", "")
+#                         speech = speech.replace(")", "")
+#                         speech = speech.replace("-", "")
+#                         speech = speech.replace("&", "")
+#                         speech = speech.replace("/", "")
+#                         speech = speech.replace(""""\
+#                                                 """, "")
+#                         speech = speech.replace("!", "")
+#                         speech = speech.replace("?", "")
+#                         speech = speech.replace("$", "")
+#                         speech = speech.replace("§", "")
+#                         speech = speech.replace(",", "")
+#                         speech = speech.replace("%", "")
+#                         speech = speech.replace("{", "")
+#                         speech = speech.replace("}", "")
+#                         TextVar = 'espeak ' + (speech)
+#                         os.system(TextVar)
+#                     elif ttsUserFC < ttsCost:
+#                         await ctx.channel.send(f"/me You don't have enough credits @{ctx.author.name}")
+#                 Balance = ttsUserFC
+#                 item['name'] = str(User)
+#                 item['id'] = int(ID)
+#                 item['balance'] = int(Balance)
+#                 item['partner'] = Partner
+#                 with open("ser.json", "w") as f:
+#                     o = json.dumps(ser, indent=2)
+#                     f.write(o)
+#                 break
+#     else:
+#         item = None
+#         with open("ser.json", "w") as f:
+#             entry.append(user)
+#             o = json.dumps(ser, indent=2)
+#             f.write(o)
+#         await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
 
-    for item in entry:
-        if item['id'] == user['id']:
-            if partner=='t':
-                entry.remove(item)
-            else:
-                Partner = item['partner']
-                User = item['name']
-                ID = item['id']
-                Balance = item['balance']
-                #change name if user changed name
-                if user['name'] != User:
-                    User = user['name']
-                ttsUserFC = Balance
-                if not speech:
-                    await ctx.channel.send(f"/me Atleast one word to read required! @{ctx.author.name}")
-                else:
-                    if ttsUserFC>=ttsCost:
-                        ttsUserFC -= ttsCost
-                        speech = '_'.join(speech)
-                        speech = speech.replace("'", "")
-                        speech = speech.replace('"', '')
-                        speech = speech.replace("(", "")
-                        speech = speech.replace(")", "")
-                        speech = speech.replace("-", "")
-                        speech = speech.replace("&", "")
-                        speech = speech.replace("/", "")
-                        speech = speech.replace(""""\
-                                                """, "")
-                        speech = speech.replace("!", "")
-                        speech = speech.replace("?", "")
-                        speech = speech.replace("$", "")
-                        speech = speech.replace("§", "")
-                        speech = speech.replace(",", "")
-                        speech = speech.replace("%", "")
-                        speech = speech.replace("{", "")
-                        speech = speech.replace("}", "")
-                        TextVar = 'espeak ' + (speech)
-                        os.system(TextVar)
-                    elif ttsUserFC<ttsCost:
-                        await ctx.channel.send(f"/me You don't have enough credits @{ctx.author.name}")
-                Balance = ttsUserFC
-                item['name'] = str(User)
-                item['id'] = int(ID)
-                item['balance'] = int(Balance)
-                item['partner'] = Partner
-                with open("ser.json", "w") as f:
-                            o = json.dumps(ser, indent=2)
-                            f.write(o)
-                break
-    else:
-        item = None
-        with open("ser.json", "w") as f:
-                entry.append(user)    
-                o = json.dumps(ser, indent=2)
-                f.write(o)
-        await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
 
 @bot.command(name='timeout')
 async def timeout(ctx, user):
-    if str(ctx.author.is_mod)=="True":
+    if str(ctx.author.is_mod) == "True":
         useless, cU, cT, cR = ctx.content.split(' ')
         await ctx.timeout(str(cU), int(cT), str(cR))
         mTs = "/me Set " + str(cU) + " for " + str(cT) + " seconds in timeout. Reason: " + str(cR)
@@ -737,80 +783,83 @@ async def timeout(ctx, user):
     else:
         await ctx.channel.send("/me Netter Versuch, der Command ist nur für Mods :)")
 
+
 @bot.command(name='event')
 async def event(ctx, user):
-    if str(ctx.author.is_mod)=="True":
+    if str(ctx.author.is_mod) == "True":
         useless, eventstatus = ctx.content.split(' ')
         eventFile = open("Event", "r")
         eventLines = eventFile.readlines()
         for eventLine in eventLines:
             eventSF = str(eventLine)
-        if eventstatus=='open' and eventSF=='open':
+        if eventstatus == 'open' and eventSF == 'open':
             await ctx.channel.send("/me Event is already opened.")
-        elif eventstatus=='open' and eventSF!='open':
+        elif eventstatus == 'open' and eventSF != 'open':
             eventFile.close()
             eventCFile = open("Event", "w+")
             eventCFile.write(eventstatus)
             eventSs = "/me Event is now " + eventstatus + ". You can now enter !get to receive 100 credits each time."
             await ctx.channel.send(eventSs)
-        elif eventstatus=='close' and eventSF=='close':
+        elif eventstatus == 'close' and eventSF == 'close':
             await ctx.channel.send("/me Event is already closed")
-        elif eventstatus=='close' and eventSF!='close':
+        elif eventstatus == 'close' and eventSF != 'close':
             eventFile.close()
             eventCFile = open("Event", "w+")
             eventCFile.write(eventstatus)
-            eventSsC = (f"/me Event is now closed ({eventstatus})")
+            eventSsC = f"/me Event is now closed ({eventstatus})"
             await ctx.channel.send(eventSsC)
         else:
             await ctx.channel.send(f"/me invalid input {ctx.author.name}")
     else:
         await ctx.channel.send("/me Netter Versuch, der Command ist nur für Mods :)")
 
+
 @bot.command(name='dice')
 async def dice(ctx, sides):
-    balance = 5000 #Default balance for newly added users
+    balance = 5000  # Default balance for newly added users
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     partner = None
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance,
-        'partner': partner
-        }
+            'id': ctx.author.id,
+            'balance': balance,
+            'partner': partner
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-        
+
     for item in entry:
         if item['id'] == user['id']:
             user['balance'] = item['balance']
 
     for item in entry:
         if item['id'] == user['id']:
-            if partner=='t':
+            if partner == 't':
                 entry.remove(item)
             else:
                 Partner = item['partner']
                 User = item['name']
                 ID = item['id']
                 Balance = item['balance']
-                #change name if user changed name
+                # change name if user changed name
                 if user['name'] != User:
                     User = user['name']
                 userCurrency = Balance
                 if RepresentsInt(sides):
                     sides = int(sides)
-                    if sides<1:
+                    if sides < 1:
                         await ctx.send(f'/me @{ctx.author.name} invalid number of sides')
                     else:
                         dice = str(random.choice(range(1, sides + 1)))
-                        if sides>1 and int(dice) == int(sides):
-                            reward = 50 * int(sides) # amount of credits earned per side
+                        if sides > 1 and int(dice) == int(sides):
+                            reward = 50 * int(sides)  # amount of credits earned per side
                             userCurrency = int(userCurrency) + reward
-                            diceMessage = f"/me @{ctx.author.name} " + str(dice) + f" is the same number as the number of sides, congrats. Take these {reward} credits. selphyPray"
+                            diceMessage = f"/me @{ctx.author.name} " + str(
+                                dice) + f" is the same number as the number of sides, congrats. Take these {reward} credits. selphyPray"
                             await ctx.channel.send(diceMessage)
                         elif dice != sides:
                             diceMessage = f"/me @{ctx.author.name} Your number is: " + dice
@@ -823,49 +872,50 @@ async def dice(ctx, sides):
                 item['balance'] = int(Balance)
                 item['partner'] = Partner
                 with open("ser.json", "w") as f:
-                            o = json.dumps(ser, indent=2)
-                            f.write(o)
+                    o = json.dumps(ser, indent=2)
+                    f.write(o)
                 break
     else:
         item = None
         with open("ser.json", "w") as f:
-                entry.append(user)    
-                o = json.dumps(ser, indent=2)
-                f.write(o)
+            entry.append(user)
+            o = json.dumps(ser, indent=2)
+            f.write(o)
         await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
+
 
 @bot.command(name='get')
 async def get(ctx):
-    balance = 5000 #Default balance for newly added users
+    balance = 5000  # Default balance for newly added users
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     partner = None
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance,
-        'partner': partner
-        }
+            'id': ctx.author.id,
+            'balance': balance,
+            'partner': partner
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-        
+
     for item in entry:
         if item['id'] == user['id']:
             user['balance'] = item['balance']
 
     for item in entry:
         if item['id'] == user['id']:
-            if partner=='t':
+            if partner == 't':
                 entry.remove(item)
             else:
                 Partner = item['partner']
                 User = item['name']
                 ID = item['id']
                 Balance = item['balance']
-                #change name if user changed name
+                # change name if user changed name
                 if user['name'] != User:
                     User = user['name']
                 eventstatusF = open("Event", "r")
@@ -874,13 +924,13 @@ async def get(ctx):
                     eventstatusS = str(eventstatusLine)
                 l = user['name']
                 eventRC = Balance
-                if eventstatusS=='open':
-                    if eventstatusS=='close':
+                if eventstatusS == 'open':
+                    if eventstatusS == 'close':
                         await ctx.channel.send("/me Event currently not running.")
                     if eventstatusS == 'open':
-                            eventRC = eventRC+100
-                            eventRsS = "/me " + l + " has participated. Balance: " + str(eventRC)
-                            await ctx.channel.send(eventRsS)
+                        eventRC = eventRC + 100
+                        eventRsS = "/me " + l + " has participated. Balance: " + str(eventRC)
+                        await ctx.channel.send(eventRsS)
                     else:
                         await ctx.channel.send("/me Event currently not running.")
                 else:
@@ -891,50 +941,51 @@ async def get(ctx):
                 item['balance'] = int(Balance)
                 item['partner'] = Partner
                 with open("ser.json", "w") as f:
-                            o = json.dumps(ser, indent=2)
-                            f.write(o)
+                    o = json.dumps(ser, indent=2)
+                    f.write(o)
                 break
     else:
         item = None
         with open("ser.json", "w") as f:
-                entry.append(user)    
-                o = json.dumps(ser, indent=2)
-                f.write(o)
+            entry.append(user)
+            o = json.dumps(ser, indent=2)
+            f.write(o)
         await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
-            
+
+
 @bot.command(name='flip')
 async def flip(ctx):
-    balance = 5000 #Default balance for newly added users
-    mf = 25 # Minimum Flip
+    balance = 5000  # Default balance for newly added users
+    mf = 25  # Minimum Flip
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     partner = None
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance,
-        'partner': partner
-        }
+            'id': ctx.author.id,
+            'balance': balance,
+            'partner': partner
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-        
+
     for item in entry:
         if item['id'] == user['id']:
             user['balance'] = item['balance']
 
     for item in entry:
         if item['id'] == user['id']:
-            if partner=='t':
+            if partner == 't':
                 entry.remove(item)
             else:
                 Partner = item['partner']
                 User = item['name']
                 ID = item['id']
                 Balance = item['balance']
-                #change name if user changed name
+                # change name if user changed name
                 if user['name'] != User:
                     User = user['name']
                 punkte = Balance
@@ -951,17 +1002,17 @@ async def flip(ctx):
                                 flipStatus = 'error'
                                 await ctx.channel.send("/me You do not have enough credits! @{ctx.author.name}")
                             elif betAmount <= punkte:
-                                #define flip
+                                # define flip
                                 coin = ('win', 'loss')
                                 flip = random.choice(coin)
-                                if flip=="win":
+                                if flip == "win":
                                     flipStatus = 'won'
-                                    punkte=punkte+betAmount
+                                    punkte = punkte + betAmount
                                     meW = "/me " + user['name'] + " won, total: " + str(punkte) + " credits!"
                                     await ctx.channel.send((meW))
-                                elif flip=="loss":
+                                elif flip == "loss":
                                     flipStatus = 'lost'
-                                    punkte=punkte-betAmount
+                                    punkte = punkte - betAmount
                                     meL = "/me " + user['name'] + " lost, total: " + str(punkte) + " credits!"
                                     await ctx.channel.send((meL))
                             else:
@@ -973,21 +1024,23 @@ async def flip(ctx):
                         else:
                             flipStatus = 'error'
                             await ctx.channel.send(f"/me Positive numbers only @{ctx.author.name}")
-                    elif VEerror==False:
-                        if betAmount=='all' or betAmount=='max':
+                    elif VEerror == False:
+                        if betAmount == 'all' or betAmount == 'max':
                             betAmount = punkte
                             if betAmount >= mf:
                                 coin = ('win', 'loss')
                                 flip = random.choice(coin)
-                                if flip=="win":
+                                if flip == "win":
                                     flipStatus = 'won'
-                                    punkte=punkte+betAmount
-                                    meW = f"/me @{ctx.author.name} went all in and won, total: " + str(punkte) + " credits!"
+                                    punkte = punkte + betAmount
+                                    meW = f"/me @{ctx.author.name} went all in and won, total: " + str(
+                                        punkte) + " credits!"
                                     await ctx.channel.send((meW))
-                                elif flip=="loss":
+                                elif flip == "loss":
                                     flipStatus = 'lost'
-                                    punkte=punkte-betAmount
-                                    meL = f"/me @{ctx.author.name} went all in and lost, total: " + str(punkte) + " credits!"
+                                    punkte = punkte - betAmount
+                                    meL = f"/me @{ctx.author.name} went all in and lost, total: " + str(
+                                        punkte) + " credits!"
                                     await ctx.channel.send((meL))
                             elif betAmount < mf:
                                 flipStatus = 'error'
@@ -1001,23 +1054,24 @@ async def flip(ctx):
                 item['balance'] = int(Balance)
                 item['partner'] = Partner
                 with open("ser.json", "w") as f:
-                            o = json.dumps(ser, indent=2)
-                            f.write(o)
-                if flipStatus=='lost':
+                    o = json.dumps(ser, indent=2)
+                    f.write(o)
+                if flipStatus == 'lost':
                     with open("jackpot", "r") as jackpotF:
                         for jackpotL in jackpotF:
                             jackpotL = int(jackpotL)
-                            jackpotL = betAmount+jackpotL
+                            jackpotL = betAmount + jackpotL
                             with open("jackpot", "w+") as jackpotF2:
                                 jackpotF2.write(str(jackpotL))
                 break
     else:
         item = None
         with open("ser.json", "w") as f:
-                entry.append(user)    
-                o = json.dumps(ser, indent=2)
-                f.write(o)
+            entry.append(user)
+            o = json.dumps(ser, indent=2)
+            f.write(o)
         await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
+
 
 @bot.command(name='luv')
 async def luv(ctx, *luvtarget):
@@ -1027,64 +1081,66 @@ async def luv(ctx, *luvtarget):
     luvtarget = luvtarget.replace(")", "")
     luvtarget = luvtarget.replace("'", "")
     luvtarget = luvtarget.replace(",", "")
-    if luvChoice<=1:
-        await ctx.timeout((ctx.author.name), 60, "doesn't have enough luv in their live")
-    elif luvChoice<15 and luvChoice>0:
-        selphyEmote='selphyCringe'
-    elif luvChoice<36 and luvChoice>14:
-        selphyEmote='selphyNuu'
-    elif luvChoice>35 and luvChoice<65:
-        selphyEmote='selphyWTF'
-    elif luvChoice>64 and luvChoice<85:
-        selphyEmote='selphyTootl2'
-    elif luvChoice>84 and luvChoice<100:
-        selphyEmote='selphyPray'
-    elif luvChoice==100:
-        selphyEmote='selphyNANI'
+    if luvChoice <= 1:
+        await ctx.timeout(ctx.author.name, 60, "doesn't have enough luv in their live")
+    elif luvChoice < 15 and luvChoice > 0:
+        selphyEmote = 'selphyCringe'
+    elif luvChoice < 36 and luvChoice > 14:
+        selphyEmote = 'selphyNuu'
+    elif luvChoice > 35 and luvChoice < 65:
+        selphyEmote = 'selphyWTF'
+    elif luvChoice > 64 and luvChoice < 85:
+        selphyEmote = 'selphyTootl2'
+    elif luvChoice > 84 and luvChoice < 100:
+        selphyEmote = 'selphyPray'
+    elif luvChoice == 100:
+        selphyEmote = 'selphyNANI'
     luvMessage = f"/me @{ctx.author.name} and {luvtarget} have a {luvChoice}% chance to fall in luv {selphyEmote}"
     await ctx.channel.send(luvMessage)
 
+
 @bot.command(name='credits')
 async def credits(ctx):
-    balance = 5000 #Default balance for newly added users
-    pityC = 300 #Amount of Pity Credits
+    balance = 5000  # Default balance for newly added users
+    pityC = 300  # Amount of Pity Credits
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     partner = None
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance,
-        'partner': partner
-        }
+            'id': ctx.author.id,
+            'balance': balance,
+            'partner': partner
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-        
+
     for item in entry:
         if item['id'] == user['id']:
             user['balance'] = item['balance']
 
     for item in entry:
         if item['id'] == user['id']:
-            if partner=='t':
+            if partner == 't':
                 entry.remove(item)
             else:
                 Partner = item['partner']
                 User = item['name']
                 ID = item['id']
                 Balance = item['balance']
-                #change name if user changed name
+                # change name if user changed name
                 if user['name'] != User:
                     User = user['name']
                 if Balance < 100:
                     cchoices = ['yes'] * 20 + ['no'] * 80
                     cyes = random.choice(cchoices)
-                    if cyes=='yes':
-                        Balance = Balance+300
-                        await ctx.channel.send(f"/me I felt bad for @{ctx.author.name} and gave him {pityC} credits. selphyPray {ctx.author.name} now has {Balance} credits.")
+                    if cyes == 'yes':
+                        Balance = Balance + 300
+                        await ctx.channel.send(
+                            f"/me I felt bad for @{ctx.author.name} and gave him {pityC} credits. selphyPray {ctx.author.name} now has {Balance} credits.")
                     else:
                         await ctx.channel.send(f"/me @{user['name']} has {Balance} credits")
                 else:
@@ -1094,36 +1150,43 @@ async def credits(ctx):
                 item['balance'] = int(Balance)
                 item['partner'] = Partner
                 with open("ser.json", "w") as f:
-                            o = json.dumps(ser, indent=2)
-                            f.write(o)
+                    o = json.dumps(ser, indent=2)
+                    f.write(o)
                 break
     else:
         item = None
         with open("ser.json", "w") as f:
-                entry.append(user)    
-                o = json.dumps(ser, indent=2)
-                f.write(o)
+            entry.append(user)
+            o = json.dumps(ser, indent=2)
+            f.write(o)
         await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
+
+
+@bot.command(name='sg')
+async def sg(ctx):
+    message = "/me @" + ctx.author.name + " - " + satzgenerator.satz()
+    await ctx.send(message)
+
 
 @bot.command(name='gift')
 async def gift(ctx, giftR, giftAmount):
-    balance = 5000 #Default balance for newly added users
+    balance = 5000  # Default balance for newly added users
     giftR = giftR.lower()
-    found_user = False #Default
-    everything = False #Default
+    found_user = False  # Default
+    everything = False  # Default
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-    
+
     user = {'name': ctx.author.name.lower(),
-        'id': ctx.author.id,
-        'balance': balance
-        }
+            'id': ctx.author.id,
+            'balance': balance
+            }
 
     with open("ser.json", "r") as f:
         ser = json.load(f)
         entry = ser['user']
-        
+
     for item in entry:
         if item['id'] == user['id']:
             user['balance'] = item['balance']
@@ -1132,77 +1195,80 @@ async def gift(ctx, giftR, giftAmount):
             giftR = item
             found_user = True
             break
-    
-    if found_user==False:
+
+    if found_user == False:
         await ctx.channel.send(f"/me Receiving user not found @{ctx.author.name}")
 
-    elif found_user==True:
+    elif found_user == True:
         for item in entry:
             if item['id'] == user['id']:
-                    Partner = item['partner']
-                    User = item['name']
-                    ID = item['id']
-                    Balance = item['balance']
-                    #change name if user changed name
-                    if user['name'] != User:
-                        User = user['name']
-                    giftLine = Balance
-                    try:
-                        int(giftAmount)
-                        VEerror = True
-                    except ValueError:
-                        VEerror = False
-                    finally:
-                        if VEerror:
-                            giftAmount = int(giftAmount)
-                            if not giftLine:
-                                giftC = 0
-                                giftRC = int(giftR['balance'])
-                            else:
-                                giftC = int(giftLine)
-                            if giftAmount <= giftC and giftAmount > 0:
-                                giftRC = int(giftR['balance'])
-                                giftRC = giftRC+giftAmount
-                                giftC = giftC-giftAmount
-                                await ctx.channel.send(f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR['name']}.")
-                            elif giftAmount <= 0:
-                                await ctx.channel.send(f"/me @{ctx.author.name} invalid gift amount")
-                            elif giftC < giftAmount:
-                                await ctx.channel.send(f"/me @{ctx.author.name} not enough credits!")
-                        elif giftAmount=='all' or giftAmount=='max':
-                            everything = True
+                Partner = item['partner']
+                User = item['name']
+                ID = item['id']
+                Balance = item['balance']
+                # change name if user changed name
+                if user['name'] != User:
+                    User = user['name']
+                giftLine = Balance
+                try:
+                    int(giftAmount)
+                    VEerror = True
+                except ValueError:
+                    VEerror = False
+                finally:
+                    if VEerror:
+                        giftAmount = int(giftAmount)
+                        if not giftLine:
+                            giftC = 0
+                            giftRC = int(giftR['balance'])
+                        else:
                             giftC = int(giftLine)
-                            giftAmount = giftC
-                            if giftAmount > 0:
-                                giftRC = int(giftR['balance'])
-                                giftRC = giftRC+giftAmount
-                                giftC = giftC-giftAmount
-                                await ctx.channel.send(f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR['name']}.")
-                            else:
-                                giftRC = int(giftR['balance'])
-                                giftRC = giftRC+giftAmount
-                                giftC = giftC-giftAmount
-                                await ctx.channel.send(f"/me @{ctx.author.name} you're broke selphyLUL")
-                        elif VEerror==False:
-                            await ctx.channel.send(f"/me @{ctx.author.name} thats not a number! selphyPout")
-                        if VEerror==True and giftAmount > 0 or everything==True and giftAmount > 0:
-                            Balance = giftC
-                            giftR['balance'] = giftRC
-                        item['name'] = str(User)
-                        item['id'] = int(ID)
-                        item['balance'] = int(Balance)
-                        item['partner'] = Partner
-                        with open("ser.json", "w") as f:
-                                    o = json.dumps(ser, indent=2)
-                                    f.write(o)
-                        break
+                        if giftAmount <= giftC and giftAmount > 0:
+                            giftRC = int(giftR['balance'])
+                            giftRC = giftRC + giftAmount
+                            giftC = giftC - giftAmount
+                            await ctx.channel.send(
+                                f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR['name']}.")
+                        elif giftAmount <= 0:
+                            await ctx.channel.send(f"/me @{ctx.author.name} invalid gift amount")
+                        elif giftC < giftAmount:
+                            await ctx.channel.send(f"/me @{ctx.author.name} not enough credits!")
+                    elif giftAmount == 'all' or giftAmount == 'max':
+                        everything = True
+                        giftC = int(giftLine)
+                        giftAmount = giftC
+                        if giftAmount > 0:
+                            giftRC = int(giftR['balance'])
+                            giftRC = giftRC + giftAmount
+                            giftC = giftC - giftAmount
+                            await ctx.channel.send(
+                                f"/me @{ctx.author.name} sent {giftAmount} credits to {giftR['name']}.")
+                        else:
+                            giftRC = int(giftR['balance'])
+                            giftRC = giftRC + giftAmount
+                            giftC = giftC - giftAmount
+                            await ctx.channel.send(f"/me @{ctx.author.name} you're broke selphyLUL")
+                    elif VEerror == False:
+                        await ctx.channel.send(f"/me @{ctx.author.name} thats not a number! selphyPout")
+                    if VEerror == True and giftAmount > 0 or everything == True and giftAmount > 0:
+                        Balance = giftC
+                        giftR['balance'] = giftRC
+                    item['name'] = str(User)
+                    item['id'] = int(ID)
+                    item['balance'] = int(Balance)
+                    item['partner'] = Partner
+                    with open("ser.json", "w") as f:
+                        o = json.dumps(ser, indent=2)
+                        f.write(o)
+                    break
         else:
             item = None
             with open("ser.json", "w") as f:
-                    entry.append(user)    
-                    o = json.dumps(ser, indent=2)
-                    f.write(o)
+                entry.append(user)
+                o = json.dumps(ser, indent=2)
+                f.write(o)
             await ctx.channel.send(f"/me Added {ctx.author.name} - @{ctx.author.name} has {balance} credits.")
+
 
 @bot.command(name='commands')
 async def commands(ctx):
@@ -1216,7 +1282,8 @@ async def commands(ctx):
     cL = cL.replace("]", "")
     cL = cL.replace("'", "")
     await ctx.channel.send(cS + str(cL))
-    
+
+
 ########################################
 #    Starts the bot                    #
 ########################################
