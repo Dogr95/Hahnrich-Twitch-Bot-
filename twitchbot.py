@@ -1000,7 +1000,7 @@ async def flip(ctx):
                         if betAmount >= mf:
                             if betAmount > punkte:
                                 flipStatus = 'error'
-                                await ctx.channel.send("/me You do not have enough credits! @{ctx.author.name}")
+                                await ctx.channel.send(f"/me You do not have enough credits! @{ctx.author.name}")
                             elif betAmount <= punkte:
                                 # define flip
                                 coin = ('win', 'loss')
