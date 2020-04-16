@@ -1,0 +1,11 @@
+{
+  "user": [
+    {
+      "name": "sample",
+      "id": 1,
+      "balance": 5000,
+      "partner": null,
+      "proposal": null
+    }
+  ]
+}
