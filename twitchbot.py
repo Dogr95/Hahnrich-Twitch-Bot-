@@ -22,7 +22,7 @@ bot = commands.Bot(
     initial_channels=[f"{CHANNEL1}", f"{CHANNEL2}"]
 )
 
-discordlink = [os.environ['DISCORD_LINK']]
+discordlink = os.environ['DISCORD_LINK']
 channelid = [os.environ['TWITCH_CHANNELID']]
 ttsCost = 500
 
@@ -40,7 +40,7 @@ async def event_ready():
     """Called once when the bot goes online."""
     print(f"{(os.environ['TWITCH_BOT_NICK'])} is online!")
     ws = bot._ws  # this is only needed to send messages within event_ready
-    await ws.channel.send(f"{CHANNEL1}", f"/me is watching!")
+    await ws.send_privmsg(f"{CHANNEL1}", f"/me is watching!")
     await ws.send_privmsg(f"{CHANNEL2}", f"/me is watching!")
 
 
