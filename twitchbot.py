@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import asyncio
 import json
 import satzgenerator
+from lists import *
 
 load_dotenv()
 CHANNEL1, CHANNEL2 = [os.environ['TWITCH_CHANNEL']] + [os.environ['TWITCH_CHANNEL2']]
@@ -21,25 +22,9 @@ bot = commands.Bot(
     initial_channels=[f"{CHANNEL1}", f"{CHANNEL2}"]
 )
 
+discordlink = [os.environ['DISCORD_LINK']]
 channelid = [os.environ['TWITCH_CHANNELID']]
 ttsCost = 500
-
-greetAnswer = ['Hi! selphyHi', 'Auch hier? selphyHi', 'Lang nicht gesehen selphyHi', 'Hey, was geht? selphyHi',
-               'Tag, haben wir uns schonmal gesehen? selphyHi']
-greetList = ['vertik1sachse', 'vertik1geist', 'vertik1flex', 'snaqblank', 'joelucutz', 'joelucutz,', 'hello', 'hello,',
-             'hi', 'hi,', 'tag', 'tag,', 'hallo', 'hallo,', 'selphyhi', 'selphyhi,', 'moin', 'moin,', 'servus',
-             'servus,', 'grüße', 'grüße,', 'hey', 'hey,', 'sup', 'sup,', 'hay', 'hay,' 'hoi', 'hoi,']
-greetWList = ['wie gehts', 'was geht', 'und dir?', 'deine lage?', 'bei dir?']
-greetWAnswer = ['Ganz okay... hoffentlich bald Feierabend selphySweat', 'Mir gehts ganz gut und selber? selphySmug',
-                'Das geht dich nichts an! selphyPout', 'Meine Lage ist unbestimmt seit der Zeit in Vietnam selphySad',
-                'Sag du es mir selphyIQ', 'Die Frage ist, wie gehts DIR? selphyAra',
-                'Lass dir mal ne andere Frage einfallen selphyRage']
-husoList = ['huso', 'haʟʟo', 'haʟʟo,', 'haiio', 'hailo', 'hailo,', 'halio', 'halio,', 'haiio,', 'halo', 'halo,',
-            'was los klaus', 'alles husos', 'husos', 'erschieß dich', 'erschiess dich',
-            'account vor drei minuten erstellt', 'xhuso']
-husoAnswer = ['Alles Husos, was los Klaus.', 'Account vor drei Minuten erstellt, ahja', 'ahja', 'xhuso']
-ripList = ['rip', 'rip,', 'f', 'f,', 'selphysad', 'noo', 'nooo', 'noooo']
-ripAnswer = ['F', 'NOOO', 'WHY', 'warum tust du das?', 'alles husos', 'beim nächsten mal läufts bestimmt besser']
 
 
 def RepresentsInt(ReprInt):
@@ -52,10 +37,10 @@ def RepresentsInt(ReprInt):
 
 @bot.event
 async def event_ready():
-    'Called once when the bot goes online.'
+    """Called once when the bot goes online."""
     print(f"{(os.environ['TWITCH_BOT_NICK'])} is online!")
     ws = bot._ws  # this is only needed to send messages within event_ready
-    await ws.send_privmsg(f"{CHANNEL1}", f"/me is watching!")
+    await ws.channel.send(f"{CHANNEL1}", f"/me is watching!")
     await ws.send_privmsg(f"{CHANNEL2}", f"/me is watching!")
 
 
@@ -97,8 +82,8 @@ async def event_ready():
 
 @bot.event
 async def event_message(ctx):
-    'Runs every time a message is sent in chat.'
-    # shortened channelsend
+    """Runs every time a message is sent in chat."""
+    # shortened channel send
     greet = ctx.content.lower()
     stateM = ctx.content.lower()
     husoN = ctx.content.lower()
@@ -175,6 +160,9 @@ async def ranking(ctx):
     message = f"/me Top {len(ranking)}: " + ', '.join(d['name'] + " " + str(d['balance']) + " credits" for d in ranking)
     await ctx.channel.send(message)
 
+@bot.command(name='discord')
+async def discord(ctx):
+    await ctx.channel.send(f"/me @{ctx.author.name} - {discordlink}")
 
 @bot.command(name='test')
 async def test(ctx):
