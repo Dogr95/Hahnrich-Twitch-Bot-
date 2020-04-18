@@ -75,7 +75,7 @@ async def on_member_join(member):
 async def on_member_update(before, after):
     n = after.nick
     if n: # Check if they updated their username
-        if n.lower().count("ey") > 0: # If username contains tim
+        if n.lower().count("ey") > 0: # If username contains ey
             pass
         else:
             last = before.nick
