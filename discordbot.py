@@ -76,6 +76,7 @@ async def on_member_update(before, after):
     n = after.nick
     if n: # Check if they updated their username
         if n.lower().count("ey") > 0: # If username contains tim
+            pass
         else:
             last = before.nick
             if last: # If they had a username before change it back to that
