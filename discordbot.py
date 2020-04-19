@@ -84,15 +84,15 @@ async def on_member_update(before, after):
             else: # Otherwise set it to "NO STOP THAT"
                 await after.edit(nick="NO STOP THAT")
 
-# @bot.event
-# async def on_message(message, mCont):
-#    if message.author == bot.user:
-#        return
-#    mcSplash=open("mcSplash.txt")
-#    Splash = [i for i in mcSplash.readlines()]
-#    SplashR = random.choice(Splash)
-#    if mCont=='quote':
-#        await message.channel.send(SplashR)
+@bot.event
+async def on_message(message):
+    user = message.author
+    if discord.utils.get(user.roles, name="nolinks") is None:
+        pass
+    else:
+        if "http" in message.content:
+            await message.delete()
+            await message.channel.send(f"You are not allowed to send links {message.author.name}")
 
 # @bot.event                                            #Absolutly broken dogshit
 # async def on_error(event, *args, **kwargs):
