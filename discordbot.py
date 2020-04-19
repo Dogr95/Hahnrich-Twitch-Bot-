@@ -6,6 +6,7 @@ from discord.ext import commands
 import time
 import json
 import satzgenerator
+import asyncio
 from lists import *
 
 load_dotenv()
@@ -92,7 +93,10 @@ async def on_message(message):
     else:
         if "http" in message.content:
             await message.delete()
-            await message.channel.send(f"You are not allowed to send links {message.author.name}")
+            g = await message.channel.send(f"You are not allowed to send links {message.author.name}")
+            await asyncio.sleep(10)
+            await g.delete()
+
 
 # @bot.event                                            #Absolutly broken dogshit
 # async def on_error(event, *args, **kwargs):
