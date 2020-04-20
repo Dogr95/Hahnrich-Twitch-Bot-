@@ -96,6 +96,7 @@ async def on_message(message):
             g = await message.channel.send(f"You are not allowed to send links {message.author.name}")
             await asyncio.sleep(10)
             await g.delete()
+    await bot.process_commands(message)
 
 
 # @bot.event                                            #Absolutly broken dogshit
