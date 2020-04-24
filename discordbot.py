@@ -152,10 +152,11 @@ async def s(ctx, Uurl):
         innocentL = innocentL.replace("'", "")
         innocentL = innocentL.replace("(", "")
         innocentL = innocentL.replace(")", "")
-        innocentF = (f"archive/{innocentL}.mp4")
+        innocentF = (f"{innocentL}.mp4")
         await ctx.send("Trying to send file...")
         try:
-            await ctx.send("", file=discord.File(innocentF))
+            # await ctx.send("", file=discord.File(innocentF))
+            await ctx.send(f"https://www.alleshusos.de/clips/archive/{innocentL}.mp4")
         except:
             await ctx.send("File too big!")
             await owner.send(f"{ctx.author.name} tried to convert {Uurl} but the file is too big to upload.")
