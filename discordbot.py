@@ -88,15 +88,16 @@ async def on_member_update(before, after):
 @bot.event
 async def on_message(message):
     user = message.author
-    if discord.utils.get(user.roles, name="nolinks") is None:
-        pass
-    else:
-        if "http" in message.content:
-            await message.delete()
-            g = await message.channel.send(f"You are not allowed to send links {message.author.name}")
-            await asyncio.sleep(10)
-            await g.delete()
-    await bot.process_commands(message)
+    if message.guild:
+        if discord.utils.get(user.roles, name="nolinks") is None:
+            pass
+        else:
+            if "http" in message.content:
+                await message.delete()
+                g = await message.channel.send(f"You are not allowed to send links {message.author.mention}")
+                await asyncio.sleep(10)
+                await g.delete()
+        await bot.process_commands(message)
 
 
 # @bot.event                                            #Absolutly broken dogshit
@@ -113,7 +114,9 @@ async def on_message(message):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send('You do not have permission to use this command!')
+        g = await ctx.send(f'You do not have permission to use this command! {ctx.author.mention}')
+        asyncio.sleep(10)
+        await g.delete()
     else:
         error = str(error)
         if "is not found" not in error:
@@ -158,8 +161,8 @@ async def s(ctx, Uurl):
             # await ctx.send("", file=discord.File(innocentF))
             await ctx.send(f"https://www.alleshusos.de/clips/archive/{innocentF}")
         except:
-            await ctx.send("File too big!")
-            await owner.send(f"{ctx.author.name} tried to convert {Uurl} but the file is too big to upload.")
+            await ctx.send(f"An unknown error occured! {ctx.author.mention}")
+            await owner.send(f"{ctx.author.name} tried to convert {Uurl} but an unknown error occured.")
         finally:
             pass
 
@@ -193,7 +196,7 @@ async def gift(ctx, giftR, giftAmount):
             found_user = True
 
     if found_user == False:
-        await ctx.send(f"Receiving user not found {ctx.author.name}")
+        await ctx.send(f"Receiving user not found {ctx.author.mention}")
 
     elif found_user == True:
         for item in entry:
@@ -210,12 +213,12 @@ async def gift(ctx, giftR, giftAmount):
                         User = user['name']
                     giftLine = Balance
                     try:
-                        int(giftAmount)
                         VEerror = True
                     except ValueError:
                         VEerror = False
                     finally:
                         if VEerror:
+                            giftAmount = int(giftAmount)
                             if not giftLine:
                                 giftC = 0
                                 giftRC = int(giftR['balance'])
@@ -225,11 +228,11 @@ async def gift(ctx, giftR, giftAmount):
                                 giftRC = int(giftR['balance'])
                                 giftRC = giftRC + giftAmount
                                 giftC = giftC - giftAmount
-                                await ctx.send(f"{ctx.author.name} sent {giftAmount} credits to {giftR['name']}.")
+                                await ctx.send(f"{ctx.author.mention} sent {giftAmount} credits to {giftR['name']}.")
                             elif giftAmount <= 0:
-                                await ctx.send(f"{ctx.author.name} invalid gift amount")
+                                await ctx.send(f"{ctx.author.mention} invalid gift amount")
                             elif giftC < giftAmount:
-                                await ctx.send(f"{ctx.author.name} not enough credits!")
+                                await ctx.send(f"{ctx.author.mention} not enough credits!")
                         elif giftAmount == 'all' or giftAmount == 'max':
                             everything = True
                             giftC = int(giftLine)
@@ -238,16 +241,16 @@ async def gift(ctx, giftR, giftAmount):
                                 giftRC = int(giftR['balance'])
                                 giftRC = giftRC + giftAmount
                                 giftC = giftC - giftAmount
-                                await ctx.send(f"{ctx.author.name} sent {giftAmount} credits to {giftR['name']}.")
+                                await ctx.send(f"{ctx.author.mention} sent {giftAmount} credits to {giftR['name']}.")
+                            elif VEerror and giftAmount <= 0:
+                                await ctx.send(f"{ctx.author.mention} you're broke selphyLUL")
                             else:
                                 giftRC = int(giftR['balance'])
                                 giftRC = giftRC + giftAmount
                                 giftC = giftC - giftAmount
-                                await ctx.send(f"{ctx.author.name} you're broke selphyLUL")
-                        elif VEerror == True and giftAmount <= 0:
-                            await ctx.send(f"{ctx.author.name} you're broke selphyLUL")
+                                await ctx.send(f"{ctx.author.mention} you're broke selphyLUL")
                         elif VEerror == False:
-                            await ctx.send(f"{ctx.author.name} thats not a number! selphyPout")
+                            await ctx.send(f"{ctx.author.mention} thats not a number! selphyPout")
                 if VEerror == True or everything == True:
                     Balance = giftC
                     giftR['balance'] = giftRC
@@ -265,18 +268,18 @@ async def gift(ctx, giftR, giftAmount):
                 entry.append(user)
                 o = json.dumps(ser, indent=2)
                 f.write(o)
-            await ctx.send(f"Added {ctx.author.name} - {ctx.author.name} has {balance} credits.")
+            await ctx.send(f"Added {ctx.author.mention} - {ctx.author.name} has {balance} credits.")
 
 
 @bot.command(name='checkerrors', help='check how many and what errors were logged (Moderator-only)')
 @commands.has_role('Moderator')
 async def checkerrors(ctx):
-    if 'last' in ctx.content:
+    if 'last' in ctx.message.content:
         with open("commanderr.log", "r") as f:
             for last_line in f:
                 fS = "Last error: " + last_line
             await ctx.send(fS)
-    elif 'last' not in ctx.content:
+    elif 'last' not in ctx.message.content:
         with open("commanderr.log", "r") as f:
             errorcount = 0
             wnf = 0
@@ -285,7 +288,7 @@ async def checkerrors(ctx):
                 if "was not found" in line:
                     wnf = wnf + 1
             errorcount = errorcount - 1
-            errormessage = str(errorcount) + " errors have been logged. " + str(wnf) + " were CommandNotFound errors"
+            errormessage = ctx.author.mention + str(errorcount) + " errors have been logged. " + str(wnf) + " were CommandNotFound errors"
             await ctx.send(errormessage)
 
 
@@ -319,18 +322,18 @@ async def marry(ctx, *pers):
     with open("marry", "r") as marryF:
         for mcontent in marryF:
             if mcontent == f"{ctx.author.name}":
-                await ctx.send(f"{ctx.author.name} we are already married, are you trying to cheat on me? selphyNANI")
+                await ctx.send(f"{ctx.author.mention} we are already married, are you trying to cheat on me? selphyNANI")
             elif myes == 'yes':
                 with open("marry", "w+") as marryF:
                     marryF.write(f"{ctx.author.name}")
-                    await ctx.send(f"YES I WILL selphyPog {ctx.author.name}")
+                    await ctx.send(f"YES I WILL selphyPog {ctx.author.mention}")
             elif myes == 'no':
                 with open("marry", "r") as marryF:
                     for mcontent in marryF:
-                        mpass = [f"No, never selphyPout @{ctx.author.name}",
-                                 f"Not even in your dreams selphyRage {ctx.author.name}",
-                                 f"Not like this selphyPout {ctx.author.name}",
-                                 f"Get a little more creative selphyIQ {ctx.author.name}"]
+                        mpass = [f"No, never selphyPout {ctx.author.mention}",
+                                 f"Not even in your dreams selphyRage {ctx.author.mention}",
+                                 f"Not like this selphyPout {ctx.author.mention}",
+                                 f"Get a little more creative selphyIQ {ctx.author.mention}"]
                         manswer = random.choice(mpass) + f" (i am still married to {mcontent})"
                         await ctx.send(manswer)
 
@@ -345,7 +348,7 @@ async def divorce(ctx):
                     await ctx.send(
                         f"WHAT? YOU CANT JUST UN-MARRY ME selphyNANI ({bot.user.name} is now married to noone)")
             elif mcontent != f"{ctx.author.name}":
-                await ctx.send(f"We are not even married {ctx.author.name} selphyPout")
+                await ctx.send(f"We are not even married {ctx.author.mention} selphyPout")
 
 
 @bot.command(name='del', help='deletes a user from the serD.json file (Sachsen-only)')
@@ -403,7 +406,6 @@ async def flip(ctx, betAmount):
                 if user['name'] != User:
                     User = user['name']
                 punkte = Balance
-                useless, betAmount = ctx.content.split(' ')
                 try:
                     betAmount = int(betAmount)
                     VEerror = True
@@ -414,7 +416,7 @@ async def flip(ctx, betAmount):
                         if betAmount > mf:
                             if betAmount > punkte:
                                 flipStatus = 'error'
-                                await ctx.send(f"You do not have enough credits! {ctx.author.name}")
+                                await ctx.send(f"You do not have enough credits! {ctx.author.mention}")
                             elif betAmount <= punkte:
                                 # define flip
                                 coin = ('win', 'loss')
@@ -422,22 +424,22 @@ async def flip(ctx, betAmount):
                                 if flip == "win":
                                     flipStatus = 'won'
                                     punkte = punkte + betAmount
-                                    meW = user['name'] + " won, total: " + str(punkte) + " credits!"
+                                    meW = ctx.author.mention + " won, total: " + str(punkte) + " credits!"
                                     await ctx.send((meW))
                                 elif flip == "loss":
                                     flipStatus = 'lost'
                                     punkte = punkte - betAmount
-                                    meL = + user['name'] + " lost, total: " + str(punkte) + " credits!"
+                                    meL = ctx.author.mention + " lost, total: " + str(punkte) + " credits!"
                                     await ctx.send((meL))
                             else:
                                 flipStatus = 'error'
-                                await ctx.send(f"invalid syntax {ctx.author.name}")
+                                await ctx.send(f"invalid syntax {ctx.author.mention}")
                         elif betAmount < mf:
                             flipStatus = 'error'
-                            await ctx.send(f"{mf} is the minimum flipable value {ctx.author.name}")
+                            await ctx.send(f"{mf} is the minimum flipable value {ctx.author.mention}")
                         else:
                             flipStatus = 'error'
-                            await ctx.send(f"Positive numbers only {ctx.author.name}")
+                            await ctx.send(f"Positive numbers only {ctx.author.mention}")
                     elif VEerror == False:
                         if betAmount == 'all' or betAmount == 'max':
                             betAmount = punkte
@@ -447,19 +449,19 @@ async def flip(ctx, betAmount):
                                 if flip == "win":
                                     flipStatus = 'won'
                                     punkte = punkte + betAmount
-                                    meW = f"{ctx.author.name} went all in and won, total: " + str(punkte) + " credits!"
+                                    meW = f"{ctx.author.mention} went all in and won, total: " + str(punkte) + " credits!"
                                     await ctx.send((meW))
                                 elif flip == "loss":
                                     flipStatus = 'lost'
                                     punkte = punkte - betAmount
-                                    meL = f"{ctx.author.name} went all in and lost, total: " + str(punkte) + " credits!"
+                                    meL = f"{ctx.author.mention} went all in and lost, total: " + str(punkte) + " credits!"
                                     await ctx.send((meL))
                             elif betAmount < mf:
                                 flipStatus = 'error'
-                                await ctx.send(f"{mf} is the minimum flipable value {ctx.author.name}")
+                                await ctx.send(f"{mf} is the minimum flipable value {ctx.author.mention}")
                         else:
                             flipStatus = 'error'
-                            await ctx.send(f"invalid syntax {ctx.author.name}")
+                            await ctx.send(f"invalid syntax {ctx.author.mention}")
                 Balance = punkte
                 item['name'] = str(User)
                 item['id'] = int(ID)
@@ -482,7 +484,7 @@ async def flip(ctx, betAmount):
             entry.append(user)
             o = json.dumps(ser, indent=2)
             f.write(o)
-        await ctx.send(f"Added {ctx.author.name} - {ctx.author.name} has {balance} credits.")
+        await ctx.send(f"Added {ctx.author.mention} - {ctx.author.name} has {balance} credits.")
 
 
 @bot.command(name='lotto', help='choose any amount of numbers, chance 1:21 - usage: !lotto [number1] [number2] ...')
@@ -521,12 +523,11 @@ async def lotto(ctx, *lottoG):
                     User = user['name']
                 lottoUser = User
                 lottoUserFC = Balance
-                useless, *lottoG = ctx.content.split(' ')
                 if 'jackpot' in lottoG:
                     with open("jackpot", "r") as jackpotF:
                         for jackpotL in jackpotF:
                             jackpotL = int(jackpotL)
-                            await ctx.send(f"Jackpot is at {jackpotL} credits. {ctx.author.name}")
+                            await ctx.send(f"Jackpot is at {jackpotL} credits. {ctx.author.mention}")
                             lottoStatus = 'check'
                 elif 'jackpot' not in lottoG:
                     with open("jackpot", "r") as jackpotF:
@@ -546,7 +547,7 @@ async def lotto(ctx, *lottoG):
                                 lottoNS = "Lotto Number: " + lottoR
                                 await ctx.send(lottoNS)
                                 if lottoGAnzahl == 1 and lottoR in lottoG:
-                                    await ctx.send(f"{ctx.author.name} won the jackpot. ({jackpotL}) selphyPog")
+                                    await ctx.send(f"{ctx.author.mention} won the jackpot. ({jackpotL}) selphyPog")
                                     with open((lottoUser), "w+") as lottoUserF:
                                         lottoUserFC = lottoUserFC + jackpotL
                                         lottoUserFC = str(lottoUserFC)
@@ -558,17 +559,17 @@ async def lotto(ctx, *lottoG):
                                 elif lottoGAnzahl != 1 and lottoR in lottoG:
                                     lottoStatus = 'won'
                                     lottoUserFC = lottoUserFC + price
-                                    lottoWS = f"{ctx.author.name} won " + str(price) + " credits. Balance: " + str(
+                                    lottoWS = f"{ctx.author.mention} won " + str(price) + " credits. Balance: " + str(
                                         lottoUserFC)
                                     await ctx.send(lottoWS)
                                 else:
                                     lottoStatus = 'lost'
-                                    lottoLS = f"{ctx.author.name} lost " + str(priceLoss) + " credits. Balance: " + str(
+                                    lottoLS = f"{ctx.author.mention} lost " + str(priceLoss) + " credits. Balance: " + str(
                                         lottoUserFC)
                                     await ctx.send(lottoLS)
                             else:
                                 lottoStatus = 'error'
-                                await ctx.send("You don't have enough credits!")
+                                await ctx.send(f"You don't have enough credits! {ctx.author.mention}")
                 Balance = lottoUserFC
                 item['name'] = str(User)
                 item['id'] = int(ID)
@@ -591,14 +592,14 @@ async def lotto(ctx, *lottoG):
             entry.append(user)
             o = json.dumps(ser, indent=2)
             f.write(o)
-        await ctx.send(f"Added {ctx.author.name} - {ctx.author.name} has {balance} credits.")
+        await ctx.send(f"Added {ctx.author.mention} - {ctx.author.name} has {balance} credits.")
 
 
 @bot.command(name='pomf', help="even the bot doesn't know what this does")
 async def pomf(ctx):
     liste = random.choice([greetAnswer, greetWAnswer, husoAnswer, ripAnswer])
     listeSmol = random.choice(liste)
-    listeMessage = listeSmol + f" {ctx.author.name} selphyHae"
+    listeMessage = listeSmol + f" {ctx.author.mention} selphyHae"
     await ctx.send(listeMessage)
 
 
@@ -643,11 +644,11 @@ async def credits(ctx):
                     if cyes == 'yes':
                         Balance = Balance + 300
                         await ctx.send(
-                            f"I felt bad for @{ctx.author.name} and gave him {pityC} credits. selphyPray {ctx.author.name} now has {Balance} credits.")
+                            f"I felt bad for @{ctx.author.mention} and gave him {pityC} credits. selphyPray {ctx.author.name} now has {Balance} credits.")
                     else:
-                        await ctx.send(f"{user['name']} has {Balance} credits")
+                        await ctx.send(f"{ctx.author.mention} has {Balance} credits")
                 else:
-                    await ctx.send(f"@{user['name']} has {Balance} credits")
+                    await ctx.send(f"{ctx.author.mention} has {Balance} credits")
                 item['name'] = str(User)
                 item['id'] = int(ID)
                 item['balance'] = int(Balance)
@@ -662,7 +663,7 @@ async def credits(ctx):
             entry.append(user)
             o = json.dumps(ser, indent=2)
             f.write(o)
-        await ctx.send(f"Added {ctx.author.name} - {ctx.author.name} has {balance} credits.")
+        await ctx.send(f"Added {ctx.author.mention} - {ctx.author.name} has {balance} credits.")
 
 
 # @bot.command(name='tts', help='testing purposes only. (Sachsen-only)')
@@ -731,17 +732,17 @@ async def dice(ctx, sides):
                 if RepresentsInt(sides):
                     sides = int(sides)
                     if sides < 1:
-                        await ctx.send(f'{ctx.author.name} invalid number of sides')
+                        await ctx.send(f'{ctx.author.mention} invalid number of sides')
                     else:
                         dice = str(random.choice(range(1, sides + 1)))
                         if sides > 1 and int(dice) == int(sides):
                             reward = 50 * int(sides)  # amount of credits earned per side
                             userCurrency = int(userCurrency) + reward
-                            diceMessage = f"{ctx.author.name} " + str(
+                            diceMessage = f"{ctx.author.mention} " + str(
                                 dice) + f" is the same number as the number of sides, congrats take these {reward} credits. selphyPray"
                             await ctx.send(diceMessage)
                         elif dice != sides:
-                            diceMessage = f"{ctx.author.name} Your number is: " + dice
+                            diceMessage = f"{ctx.author.mention} Your number is: " + dice
                             await ctx.send(diceMessage)
                 else:
                     await ctx.send("invalid input")
@@ -760,7 +761,7 @@ async def dice(ctx, sides):
             entry.append(user)
             o = json.dumps(ser, indent=2)
             f.write(o)
-        await ctx.send(f"Added {ctx.author.name} - {ctx.author.name} has {balance} credits.")
+        await ctx.send(f"Added {ctx.author.mention} - {ctx.author.name} has {balance} credits.")
 
 
 @bot.command(name='calc',
@@ -789,7 +790,7 @@ async def calc(ctx, calc1, calcR, calc2):
                 calcE = int(calc1) * int(calc2)
             else:
                 ErrorFree = False
-                await ctx.send(f"invalid operator {ctx.author.name} - Possible Operators: '+' '-' ':' '*'")
+                await ctx.send(f"invalid operator {ctx.author.mention} - Possible Operators: '+' '-' ':' '*'")
             if ErrorFree:
                 await ctx.send(calcE)
         else:
@@ -800,13 +801,13 @@ async def calc(ctx, calc1, calcR, calc2):
 @commands.has_role('Moderator')
 async def event(ctx, eventstatus):
     if True:
-        # useless, eventstatus = ctx.content.split(' ')
+        # useless, eventstatus = ctx.message.content.split(' ')
         eventFile = open("Event", "r")
         eventLines = eventFile.readlines()
         for eventLine in eventLines:
             eventSF = str(eventLine)
         if eventstatus == 'open' and eventSF == 'open':
-            await ctx.send("Event is already opened.")
+            await ctx.send(f"Event is already opened. {ctx.author.mention}")
             actEv = "Event is: " + eventstatus
             activity = discord.Game(actEv)
             await bot.change_presence(status=discord.Status.idle, activity=activity)
@@ -836,7 +837,7 @@ async def event(ctx, eventstatus):
             activity = discord.Game(actEv)
             await bot.change_presence(status=discord.Status.idle, activity=activity)
         else:
-            await ctx.send(f"invalid input {ctx.author.name}")
+            await ctx.send(f"invalid input {ctx.author.mention}")
 
 
 @bot.command(name='get', help='participate in the event (only possible while its open)')
@@ -905,7 +906,7 @@ async def get(ctx):
             entry.append(user)
             o = json.dumps(ser, indent=2)
             f.write(o)
-        await ctx.send(f"Added {ctx.author.name} - {ctx.author.name} has {balance} credits.")
+        await ctx.send(f"Added {ctx.author.mention} - {ctx.author.name} has {balance} credits.")
 
 
 bot.run(TOKEN)
