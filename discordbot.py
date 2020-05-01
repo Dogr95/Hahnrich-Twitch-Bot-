@@ -8,6 +8,7 @@ import json
 import satzgenerator
 import asyncio
 from lists import *
+import profiler
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -72,18 +73,20 @@ async def on_member_join(member):
     newMember = (f"{member.name}")
     await owner.send(newMember)
 
+
 @bot.event
 async def on_member_update(before, after):
     n = after.nick
-    if n: # Check if they updated their username
-        if n.lower().count("ey") > 0: # If username contains ey
+    if n:  # Check if they updated their username
+        if n.lower().count("ey") > 0:  # If username contains ey
             pass
         else:
             last = before.nick
-            if last: # If they had a username before change it back to that
+            if last:  # If they had a username before change it back to that
                 await after.edit(nick=last)
-            else: # Otherwise set it to "NO STOP THAT"
+            else:  # Otherwise set it to "NO STOP THAT"
                 await after.edit(nick="NO STOP THAT")
+
 
 @bot.event
 async def on_message(message):
@@ -115,7 +118,7 @@ async def on_message(message):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         g = await ctx.send(f'You do not have permission to use this command! {ctx.author.mention}')
-        asyncio.sleep(10)
+        await asyncio.sleep(10)
         await g.delete()
     else:
         error = str(error)
@@ -288,8 +291,99 @@ async def checkerrors(ctx):
                 if "was not found" in line:
                     wnf = wnf + 1
             errorcount = errorcount - 1
-            errormessage = ctx.author.mention + str(errorcount) + " errors have been logged. " + str(wnf) + " were CommandNotFound errors"
+            errormessage = ctx.author.mention + str(errorcount) + " errors have been logged. " + str(
+                wnf) + " were CommandNotFound errors"
             await ctx.send(errormessage)
+
+
+@bot.command(name='p', help='secret')
+@commands.has_role('innocent')
+async def p(ctx, *args):
+    args = list(args)
+    if "add" in args:
+        args.pop(0)
+        print(args)
+        for b in args:
+            args = b
+        get = profiler.Streamer(name=args)
+        profiler.Streamer.add(get)
+        profiler.save()
+        await ctx.send("Streamer added with default config.")
+    elif "edit" in args:
+        args.pop(0)
+        cargs = args[1].split("=")
+        if cargs[0] == "name":
+            tc = "name"
+            profiler.Streamer.edit(args[0], name=cargs[1])
+        elif cargs[0] == "uid":
+            tc = "uid"
+            profiler.Streamer.edit(args[0], uid=cargs[1])
+        elif cargs[0] == "birthday":
+            tc = "birthday"
+            profiler.Streamer.edit(args[0], birthday=cargs[1])
+        elif cargs[0] == "age":
+            tc = "age"
+            profiler.Streamer.edit(args[0], age=cargs[1])
+        elif cargs[0] == "job":
+            tc = "job"
+            profiler.Streamer.edit(args[0], job=cargs[1])
+        elif cargs[0] == "favor":
+            tc = "favor"
+            profiler.Streamer.edit(args[0], favor=cargs[1])
+        elif cargs[0] == "relationship":
+            tc = "relationship"
+            profiler.Streamer.edit(args[0], relationship=cargs[1])
+        elif cargs[0] == "location":
+            tc = "location"
+            profiler.Streamer.edit(args[0], location=cargs[1])
+        elif cargs[0] == "link":
+            tc = "link"
+            profiler.Streamer.edit(args[0], link=cargs[1])
+        elif cargs[0] == "tags":
+            tc = "tags"
+            profiler.Streamer.edit(args[0], tags=cargs[1])
+        await ctx.send(f"Changed {args[0]}, {tc} to {cargs[1]}")
+
+    elif "list" in args:
+        liste = profiler.make_list()
+        name_of_streamers = []
+        for x in liste:
+            name_of_streamers.append(x.name)
+        message = "List of streamers: " + ', '.join(name_of_streamers)
+        await ctx.send(message)
+    elif "details" in args:
+        args.pop(0)
+        result = profiler.Streamer.details(args[0])
+        url = result['link']
+        add_age_to_bday = f"{result['birthday']}" + f"({result['age']})"
+        embed = discord.Embed(title=result['name'], type="rich", url=url)
+        embed.add_field(name="ID:", value=result['id'], inline=False)
+        embed.add_field(name="Birthday(age):", value=str(add_age_to_bday))
+        embed.add_field(name="Job:", value= result['job'])
+        embed.add_field(name="Favor:", value=result['favor'])
+        embed.add_field(name="Relationship:", value=result['relationship'])
+        embed.add_field(name="Location:", value=result['location'])
+        embed.add_field(name="Tags:", value=result['tags'])
+        await ctx.send(embed=embed)
+    elif "save" in args:
+        profiler.save()
+        await ctx.send("Profiler saved.")
+    elif "remove" in args:
+        args.pop(0)
+        for b in args:
+            args = b
+        profiler.Streamer.remove(args)
+        await ctx.send("Streamer removed.")
+    elif "exists" in args:
+        args.pop(0)
+        for b in args:
+            args = b
+        if profiler.exists(args):
+            await ctx.send("Streamer is in list")
+        else:
+            await ctx.send("Streamer is not in list")
+    else:
+        pass
 
 
 @bot.command(name='sg', help='generates a random sentence')
@@ -322,7 +416,8 @@ async def marry(ctx, *pers):
     with open("marry", "r") as marryF:
         for mcontent in marryF:
             if mcontent == f"{ctx.author.name}":
-                await ctx.send(f"{ctx.author.mention} we are already married, are you trying to cheat on me? selphyNANI")
+                await ctx.send(
+                    f"{ctx.author.mention} we are already married, are you trying to cheat on me? selphyNANI")
             elif myes == 'yes':
                 with open("marry", "w+") as marryF:
                     marryF.write(f"{ctx.author.name}")
@@ -449,12 +544,14 @@ async def flip(ctx, betAmount):
                                 if flip == "win":
                                     flipStatus = 'won'
                                     punkte = punkte + betAmount
-                                    meW = f"{ctx.author.mention} went all in and won, total: " + str(punkte) + " credits!"
+                                    meW = f"{ctx.author.mention} went all in and won, total: " + str(
+                                        punkte) + " credits!"
                                     await ctx.send((meW))
                                 elif flip == "loss":
                                     flipStatus = 'lost'
                                     punkte = punkte - betAmount
-                                    meL = f"{ctx.author.mention} went all in and lost, total: " + str(punkte) + " credits!"
+                                    meL = f"{ctx.author.mention} went all in and lost, total: " + str(
+                                        punkte) + " credits!"
                                     await ctx.send((meL))
                             elif betAmount < mf:
                                 flipStatus = 'error'
@@ -538,8 +635,9 @@ async def lotto(ctx, *lottoG):
                             price = int(price)
                             priceLoss = len(lottoG) * 100
                             lottoN = (
-                            '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17',
-                            '18', '19', '20', '21')
+                                '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16',
+                                '17',
+                                '18', '19', '20', '21')
                             lottoR = random.choice(lottoN)
                             lottoGAnzahl = (len(lottoG))
                             if lottoUserFC >= priceLoss:
@@ -564,7 +662,8 @@ async def lotto(ctx, *lottoG):
                                     await ctx.send(lottoWS)
                                 else:
                                     lottoStatus = 'lost'
-                                    lottoLS = f"{ctx.author.mention} lost " + str(priceLoss) + " credits. Balance: " + str(
+                                    lottoLS = f"{ctx.author.mention} lost " + str(
+                                        priceLoss) + " credits. Balance: " + str(
                                         lottoUserFC)
                                     await ctx.send(lottoLS)
                             else:
