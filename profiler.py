@@ -1,4 +1,6 @@
 import json
+import os
+from time import sleep
 
 
 def load():
@@ -23,7 +25,7 @@ def make_list():
     """For every streamer in json add streamer object to list_of_streamers"""
     list_of_streamers = []
     for st in loop:
-        st = Streamer(name=st['name'], uid=st['id'], birthday=st['birthday'], age=st['age'], job=st['job'],
+        st = Streamer(name=st['name'], real_name=['real_name'], uid=st['id'], birthday=st['birthday'], age=st['age'], job=st['job'],
                       favor=st['favor'], relationship=st['relationship'],
                       location=st['location'], link=st['link'], tags=st['link'])
         list_of_streamers.append(st)
@@ -37,10 +39,11 @@ def save():
 
 
 class Streamer:
-    def __init__(self, name=None, uid=None, birthday=None, age=None, job=None, favor=None, relationship=None,
+    def __init__(self, name=None, real_name=None, uid=None, birthday=None, age=None, job=None, favor=None, relationship=None,
                  location=None, link=None, tags=None):
         """Returns Streamer(Object)"""
         self.name = name
+        self.real_name = real_name
         self.uid = uid
         self.birthday = birthday
         self.age = age
@@ -55,6 +58,7 @@ class Streamer:
         """Add Streamer to json"""
         added_streamer = {
             "name": self.name,
+            "real_name": self.real_name,
             "id": self.uid,
             "birthday": self.birthday,
             "age": self.age,
@@ -66,12 +70,14 @@ class Streamer:
             "tags": self.tags}
         loop.append(added_streamer)
 
-    def edit(self, name=None, uid=None, birthday=None, age=None, job=None, favor=None, relationship=None,
+    def edit(self, name=None, real_name=None, uid=None, birthday=None, age=None, job=None, favor=None, relationship=None,
              location=None, link=None, tags=None):
         for editable in loop:
             if editable['name'] == self:
                 if name != None:
                     editable['name'] = name
+                if real_name != None:
+                    editable['real_name'] = real_name
                 if uid != None:
                     editable['id'] = uid
                 if birthday != None:
@@ -95,6 +101,12 @@ class Streamer:
         else:
             print("Streamer not found")
 
+    def refresh(self):
+        os.system("node bot.js " + self)
+        with open("letzter_huso") as F:
+            ref = F.readline()
+        return ref
+
     def remove(self):
         """Remove Streamer matching name from json"""
         testing = Streamer(name=self)
@@ -102,6 +114,7 @@ class Streamer:
             if test['name'] == testing.name:
                 removed_streamer = {
                     "name": testing.name,
+                    "real_name": testing.real_name,
                     "id": testing.uid,
                     "birthday": testing.birthday,
                     "age": testing.age,
@@ -122,6 +135,7 @@ class Streamer:
             if test['name'] == testing.name:
                 details_streamer = {
                     "name": test['name'],
+                    "real_name": test['real_name'],
                     "id": test['id'],
                     "birthday": test['birthday'],
                     "age": test['age'],
@@ -144,7 +158,7 @@ if __name__ == "__main__":
 
     # For every streamer in json add streamer object to list_of_streamers
     for st in loop:
-        st = Streamer(name=st['name'], uid=st['id'], birthday=st['birthday'], age=st['age'], job=st['job'],
+        st = Streamer(name=st['name'], real_name=st['real_name'], uid=st['id'], birthday=st['birthday'], age=st['age'], job=st['job'],
                       favor=st['favor'], relationship=st['relationship'],
                       location=st['location'], link=st['link'], tags=st['link'])
         list_of_streamers.append(st)
@@ -166,7 +180,13 @@ if __name__ == "__main__":
     # print(loop)
 
     # Get details about a streamer
-    print(Streamer.details("Calitobundo"))
+    # print(Streamer.details("Calitobundo"))
+
+    # k = Streamer(name='UltraHuso')
+    # print(k)
+
+    # Runs node script for avatar_url
+    print(Streamer.refresh("calitobundo"))
 
     # Save json
     save()
