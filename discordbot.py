@@ -315,6 +315,9 @@ async def p(ctx, *args):
         if cargs[0] == "name":
             tc = "name"
             profiler.Streamer.edit(args[0], name=cargs[1])
+        elif cargs[0] == 'real_name':
+            tc = 'real_name'
+            profiler.Streamer.edit(args[0], name=cargs[1])
         elif cargs[0] == "uid":
             tc = "uid"
             profiler.Streamer.edit(args[0], uid=cargs[1])
@@ -356,7 +359,12 @@ async def p(ctx, *args):
         result = profiler.Streamer.details(args[0])
         url = result['link']
         add_age_to_bday = f"{result['birthday']}" + f"({result['age']})"
-        embed = discord.Embed(title=result['name'], type="rich", url=url)
+        thumbnail = profiler.Streamer.refresh(args[0])
+        color = discord.Colour(215)
+        embed = discord.Embed(title=result['name'], type="rich", url=url, colour=color)
+        embed.set_author(name="Profiler:", url=thumbnail)
+        embed.set_footer(text="https://alleshusos.de", icon_url=thumbnail)
+        embed.add_field(name="Real Name:", value=result['real_name'])
         embed.add_field(name="ID:", value=result['id'], inline=False)
         embed.add_field(name="Birthday(age):", value=str(add_age_to_bday))
         embed.add_field(name="Job:", value= result['job'])
@@ -382,6 +390,10 @@ async def p(ctx, *args):
             await ctx.send("Streamer is in list")
         else:
             await ctx.send("Streamer is not in list")
+    elif "refresh" in args:
+        args.pop(0)
+        message = profiler.Streamer.refresh(args[0])
+        await ctx.send(message)
     else:
         pass
 
