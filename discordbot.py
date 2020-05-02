@@ -7,8 +7,12 @@ import time
 import json
 import satzgenerator
 import asyncio
+import nacl
 from lists import *
 import profiler
+import math
+import soundfile as sf
+import numpy
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -43,6 +47,11 @@ def RepresentsInt(ReprInt):
     except ValueError:
         return False
 
+def random_join():
+    time_till_join = math.round(math.random() * 1000 + 500)
+    asyncio.sleep(time_till_join)
+    join()
+    random_join()
 
 @bot.event
 async def on_ready():
@@ -140,6 +149,24 @@ async def test(ctx):
     await owner.send(f'{ctx.author.name} with id: {ctx.author.id} ran test')
     await ctx.send("no u")
 
+@bot.command(name='join', help='join voice')
+async def join(ctx):
+    vc = ctx.author.voice.channel
+    send = discord.AudioSource()
+    bot.VoiceState = await vc.connect()
+
+@bot.command(name='play', help='play machine gun geschlabber')
+async def play(ctx):
+    if bot.VoiceState is None:
+        vc = ctx.author.voice.channel
+        bot.VoiceState = await vc.connect()
+    player = discord.FFmpegPCMAudio('test.mp3')
+    if not bot.VoiceState.is_playing():
+        bot.VoiceState.play(player, after=None)
+
+@bot.command(name='part', help='part voice')
+async def part(ctx):
+    await discord.VoiceClient.disconnect(bot.VoiceState)
 
 @bot.command(name='memberlist', help='sends a file with all members')
 async def memberlist(ctx):
