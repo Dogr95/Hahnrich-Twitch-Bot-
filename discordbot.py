@@ -394,6 +394,14 @@ async def p(ctx, *args):
             await ctx.send("Streamer is in list")
         else:
             await ctx.send("Streamer is not in list")
+    elif "clips" in args:
+        args.pop(0)
+        os.system("node main.js " + args[0])
+        with open("clips", "r") as F:
+            clips = ""
+            for clip in range(10):
+                clips += F.readline()
+        await ctx.send(clips)
     elif "refresh" in args:
         args.pop(0)
         message = profiler.Streamer.refresh(args[0])
