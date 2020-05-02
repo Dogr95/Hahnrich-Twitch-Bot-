@@ -394,6 +394,20 @@ async def p(ctx, *args):
         args.pop(0)
         message = profiler.Streamer.refresh(args[0])
         await ctx.send(message)
+    elif "help" in args:
+        embed = discord.Embed(title="List of !p commands:", type="rich", url="https://alleshusos.de", colour=215)
+        list_of_comms = {'add [streamer]': 'adds streamer with default values',
+                         'remove [streamer]': 'removes streamer matching name',
+                         'edit [streamer] key=new': 'changes streamer key value',
+                         'refresh [streamer]': 'returns the profile pic of given streamer',
+                         'save': 'saves all removed streamers',
+                         'exists [streamer]': 'checks if streamer is in file',
+                         'list': 'lists all streamers in file',
+                         'details [streamer]': 'shows details about given streamer'
+                         }
+        for name, help in list_of_comms.items():
+            embed.add_field(name=name, value=help)
+        await ctx.send(embed=embed)
     else:
         pass
 
