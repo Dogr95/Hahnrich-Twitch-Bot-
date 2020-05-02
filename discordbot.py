@@ -317,7 +317,7 @@ async def p(ctx, *args):
             profiler.Streamer.edit(args[0], name=cargs[1])
         elif cargs[0] == 'real_name':
             tc = 'real_name'
-            profiler.Streamer.edit(args[0], name=cargs[1])
+            profiler.Streamer.edit(args[0], real_name=cargs[1])
         elif cargs[0] == "uid":
             tc = "uid"
             profiler.Streamer.edit(args[0], uid=cargs[1])
