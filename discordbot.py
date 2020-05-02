@@ -11,8 +11,6 @@ import nacl
 from lists import *
 import profiler
 import math
-import soundfile as sf
-import numpy
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
