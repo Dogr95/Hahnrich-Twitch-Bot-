@@ -100,6 +100,9 @@ async def on_message(message):
                 g = await message.channel.send(f"You are not allowed to send links {message.author.mention}")
                 await asyncio.sleep(10)
                 await g.delete()
+        if "huso" in message.content.lower():
+            if message.author != bot.user:
+                await message.channel.send("https://alleshusos.de")
         await bot.process_commands(message)
 
 
