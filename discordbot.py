@@ -91,7 +91,9 @@ async def on_member_update(before, after):
 @bot.event
 async def on_message(message):
     user = message.author
-    if message.guild:
+    with open("huso_status", "r") as F:
+        huso = F.readline()
+    if message.guild and message.author != bot.user:
         if discord.utils.get(user.roles, name="nolinks") is None:
             pass
         else:
@@ -100,9 +102,8 @@ async def on_message(message):
                 g = await message.channel.send(f"You are not allowed to send links {message.author.mention}")
                 await asyncio.sleep(10)
                 await g.delete()
-        if "huso" in message.content.lower():
-            if message.author != bot.user:
-                await message.channel.send("https://alleshusos.de")
+        if "huso" in message.content.lower() and huso == 'True':
+            await message.channel.send("https://alleshusos.de")
         await bot.process_commands(message)
 
 
@@ -923,6 +924,21 @@ async def calc(ctx, calc1, calcR, calc2):
                 await ctx.send(calcE)
         else:
             await ctx.send("Invalid syntax")
+
+@bot.command(name='toggle', help='enables/disables huso')
+async def huso(ctx):
+    with open("huso_status", "r") as F:
+        huso = F.readline()
+    if huso == 'True':
+        huso = False
+        with open("huso_status", "w") as F:
+            F.write(str(huso))
+        await ctx.send("Huso toggled off.")
+    else:
+        huso = True
+        with open("huso_status", "w") as F:
+            F.write(str(huso))
+        await ctx.send("Huso toggled on.")
 
 
 @bot.command(name='event', help='opens the event (Moderator only)')
