@@ -1,8 +1,9 @@
+require('dotenv').config();
 const TwitchModule = require('twitch').default;
+const clientId = process.env.clientId;
+const clientSecret = process.env.clientSecret;
 const F = require('fs');
 
-const clientId = '85kp86tojs4oloqsdkq705x99bkdmd';
-const clientSecret = '066i3rsrw2ku1l8y0q5qdxvfs633ak';
 const TwitchClient = TwitchModule.withClientCredentials(clientId, clientSecret);
 
 const TestUser = process.argv.slice(2).join();
